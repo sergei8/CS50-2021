@@ -1,0 +1,17 @@
+:( identifies 378282246310005 as AMEX
+    expected "AMEX\n", not "INVALID\n"
+
+:( identifies 371449635398431 as AMEX
+    expected "AMEX\n", not "INVALID\n"
+
+:( identifies 5555555555554444 as MASTERCARD
+    expected "MASTERCARD\n", not "VISA\n"
+
+:( identifies 5105105105105100 as MASTERCARD
+    expected "MASTERCARD\n", not "VISA\n"
+
+:( identifies 4222222222222 as VISA
+    expected "VISA\n", not "INVALID\n"
+
+:( identifies 5673598276138003 as INVALID
+    expected "INVALID\n", not "VISA\n"
