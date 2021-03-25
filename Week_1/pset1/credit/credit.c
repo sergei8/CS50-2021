@@ -150,7 +150,7 @@ int main(void)
     // get 2 fist digits of the card number
     int first_two_digit = get_first_two_digit(card_number);
     printf("%i\n", first_two_digit);
-    
+
     // get card type
     string card_type = get_card_type(first_two_digit);
     printf("%s\n", card_type);
