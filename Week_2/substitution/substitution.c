@@ -167,4 +167,5 @@ int find_char_index(char c)
         }
     }
     return -1;
+    
 }
