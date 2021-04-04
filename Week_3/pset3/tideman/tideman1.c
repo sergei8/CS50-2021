@@ -36,7 +36,6 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
-int get_position_number(int i, int ranks[]);
 
 int main(int argc, string argv[])
 {
@@ -60,10 +59,10 @@ int main(int argc, string argv[])
     
     fclose(fp);
 
-    for (int i = 0; i < i1; i++)
-        printf("%s\n", file_content[i]);
+    // for (int i = 0; i < i1; i++)
+    //     printf("%s\n", file_content[i]);
  
-    printf("-----------------------------\n");
+    // printf("-----------------------------\n");
     // -------------------------------
 
     // Check for invalid usage
@@ -167,35 +166,22 @@ int get_candidate_position(string name)
 void record_preferences(int ranks[])
 {
     for (int i = 0; i < candidate_count; i++)
-    {
-        int j = get_position_number(i, ranks);
-        if (j == -1)
-        {
-            printf("Invalid ranks\n");
-            exit (1);
-        }
-        preferences[i][j]++; 
-    }
+        for (int j = 0; j < candidate_count; j++)
+            if (i < j)
+                preferences[ranks[i]][ranks[j]]++;
 
     // debug
     for (int i = 0; i < candidate_count; i++)
+        printf("%i  ", ranks[i]);
+    printf("\n");
+    for (int i = 0; i < candidate_count; i++)
     {
         for (int j = 0; j < candidate_count; j++)
-            printf("%i (%i,%i); ", preferences[i][j], i, j);
+            printf("%i    ", preferences[i][j]);
+            // printf("%i (%i,%i); ", preferences[i][j], i, j);
         printf("\n");
     }
-
     return;
-}
-
-// get candidate `i` position number int the voter rank
-int get_position_number(int i, int ranks[])
-{
-    for (int j = 0; j < candidate_count; j++)
-        if (i == ranks[j])
-            return j;
-
-    return -1;
 }
 
 // Record pairs of candidates where one is preferred over the other
@@ -219,9 +205,9 @@ void add_pairs(void)
 
     // debug
     for (int i = 0; i < pair_count; i++)
-        printf("(w = %i, l = %i), ", pairs[i].winner, pairs[i].loser);
+        printf("(w = %i, l = %i); ", pairs[i].winner, pairs[i].loser);
 
-    // printf("\n%i\n ", pair_count);
+    printf("\n%i\n ", pair_count);
 
     return;
 }
