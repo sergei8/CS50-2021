@@ -187,23 +187,27 @@ void record_preferences(int ranks[])
 // Record pairs of candidates where one is preferred over the other
 void add_pairs(void)
 {
-    for (int i = 0; i < candidate_count - 1; i++)
+    for (int i = 0; i < candidate_count; i++)
     {
         for (int j = i; j < candidate_count; j++)
         {
-            if (preferences[i][i] > preferences[i][j])
+            if (preferences[i][j] > preferences[j][i])
             {
-                pairs[pair_count].winner = i; pairs[pair_count].loser = j; pair_count++;
+                pairs[pair_count].winner = i;
+                pairs[pair_count].loser = j;
+                pair_count++;
             }
-            else if (preferences[i][i] < preferences[i][j])
+            else if (preferences[i][j] < preferences[j][i])
             {
-                pairs[pair_count].winner = j; pairs[pair_count].loser = i; pair_count++;
+                pairs[pair_count].winner = j;
+                pairs[pair_count].loser = i;
+                pair_count++;
             }
-            // printf ("i=%i,j=%i : %i, ", i, j, preferences[i][j]);
         }
     }
 
     // debug
+    printf("\n");
     for (int i = 0; i < pair_count; i++)
         printf("(w = %i, l = %i); ", pairs[i].winner, pairs[i].loser);
 
@@ -215,7 +219,22 @@ void add_pairs(void)
 // Sort pairs in decreasing order by strength of victory
 void sort_pairs(void)
 {
-    // TODO
+    int margin[pair_count];
+    
+    // calculate voters margins for pairs
+    for (int i = 0; i < pair_count; i++)
+            margin[i] = preferences[pairs[i].winner][pairs[i].loser] -
+                        preferences[pairs[i].loser][pairs[i].winner];
+
+
+    // sort mrgins and map it to pairs
+
+    // debug
+    printf("\n");
+    for (int i = 0; i < pair_count; i++)
+        printf("%i, ", margin[i]);
+
+
     return;
 }
 
