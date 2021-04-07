@@ -1,5 +1,7 @@
 #include <cs50.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Max number of candidates
 #define MAX 9
@@ -32,6 +34,9 @@ void add_pairs(void);
 void sort_pairs(void);
 void lock_pairs(void);
 void print_winner(void);
+int get_candidate_position(string name);
+void update_rank(int rank, int ranks[]);
+int find_source(void);
 
 int main(int argc, string argv[])
 {
@@ -44,7 +49,6 @@ int main(int argc, string argv[])
 
     // Populate array of candidates
     candidate_count = argc - 1;
-    printf("%i\n", candidate_count);
     
     if (candidate_count > MAX)
     {
@@ -101,42 +105,141 @@ int main(int argc, string argv[])
 // Update ranks given a new vote
 bool vote(int rank, string name, int ranks[])
 {
-    // TODO
-    return false;
+    // validate correct candidate name
+    int pos = get_candidate_position(name);
+    if (pos == -1)
+        return false;
+    
+    // update candidate rank
+    ranks[rank] = pos;
+
+    return true;
+}
+
+// find  candidate position (-1 if incorrect candidate name)
+int get_candidate_position(string name)
+{
+    for (int i = 0; i < candidate_count; i++)
+    {
+        if (strcmp(candidates[i], name) == 0)
+            return i;
+    }
+    return -1;
 }
 
 // Update preferences given one voter's ranks
 void record_preferences(int ranks[])
 {
-    // TODO
+    for (int i = 0; i < candidate_count; i++)
+        for (int j = 0; j < candidate_count; j++)
+            if (i < j)
+                preferences[ranks[i]][ranks[j]]++;
+
     return;
 }
 
 // Record pairs of candidates where one is preferred over the other
 void add_pairs(void)
 {
-    // TODO
+    for (int i = 0; i < candidate_count; i++)
+    {
+        for (int j = i; j < candidate_count; j++)
+        {
+            if (preferences[i][j] > preferences[j][i])
+            {
+                pairs[pair_count].winner = i;
+                pairs[pair_count].loser = j;
+                pair_count++;
+            }
+            else if (preferences[i][j] < preferences[j][i])
+            {
+                pairs[pair_count].winner = j;
+                pairs[pair_count].loser = i;
+                pair_count++;
+            }
+        }
+    }
+
     return;
 }
 
 // Sort pairs in decreasing order by strength of victory
 void sort_pairs(void)
 {
-    // TODO
+    int margin[pair_count];
+    
+    // calculate voters margins for pairs
+    for (int i = 0; i < pair_count; i++)
+            margin[i] = preferences[pairs[i].winner][pairs[i].loser] -
+                        preferences[pairs[i].loser][pairs[i].winner];
+
+
+    // sort margins and pairs
+    int i_curr = 0;
+    for (int i = i_curr; i < pair_count; i++)
+    {
+        for(int j = 0; j < pair_count; j++)
+        {
+            if (margin[j] < margin[i])
+            {
+                // swap margin & pairs
+                int tmp = margin[i];    pair tmp_pairs = pairs[i];
+                margin[i] = margin[j];  pairs[i] = pairs[j];
+                margin[j] = tmp;        pairs[j] = tmp_pairs;  
+                break;
+            }
+        }
+        i_curr++;
+    }
+
     return;
 }
 
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
-    // TODO
+    // find for source
+    int source = find_source();
+
+    // if source found - lock all pairs
+    if (source >= 0)
+        for (int i = 0; i < pair_count; i++)
+            locked[pairs[i].winner][pairs[i].loser] = true;
+
+    // if not - unlock one last
+    else
+        for (int i = 0; i < pair_count - 1; i++)
+            locked[pairs[i].winner][pairs[i].loser] = true;
+    
     return;
 }
 
 // Print the winner of the election
 void print_winner(void)
 {
-    // TODO
+    // find source of the graph - column with all `falses`
+    for (int j = 0; j < candidate_count; j++)
+    {
+        bool sum_j = false;
+        for (int i = 0; i < candidate_count; i++)
+            sum_j = sum_j || locked[i][j];
+        if (!sum_j)
+            printf("\n%s", candidates[j]);
+    }
+    
     return;
 }
 
+// find source of graph (index - yes, -1 - no: cycle)
+int find_source(void)
+{
+    for (int j = 0; j < candidate_count; j++)
+    {
+        bool sum_j = false;
+        for (int i = 0; i < candidate_count; i++)
+            sum_j = sum_j || locked[i][j];
+        if (!sum_j)
+            return j;
+    }
+    return -1;
+} 

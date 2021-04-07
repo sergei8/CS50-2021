@@ -1,0 +1,27 @@
+) tideman.c exists
+:) tideman compiles
+:) vote returns true when given name of candidate
+:) vote returns false when given name of invalid candidate
+:) vote correctly sets rank for first preference
+:) vote correctly sets rank for all preferences
+:) record_preferences correctly sets preferences for first voter
+:) record_preferences correctly sets preferences for all voters
+:) add_pairs generates correct pair count when no ties
+:) add_pairs generates correct pair count when ties exist
+:) add_pairs fills pairs array with winning pairs
+:) add_pairs does not fill pairs array with losing pairs
+:) sort_pairs sorts pairs of candidates by margin of victory
+:) lock_pairs locks all pairs when no cycles
+
+
+:( lock_pairs skips final pair if it creates cycle
+    lock_pairs did not correctly lock all non-cyclical pairs
+
+:( lock_pairs skips middle pair if it creates a cycle
+    lock_pairs did not correctly lock all non-cyclical pairs
+
+:( print_winner prints winner of election when one candidate wins over all others
+    print_winner did not print winner of election
+    
+:( print_winner prints winner of election when some pairs are tied
+    print_winner did not print winner of election

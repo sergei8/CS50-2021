@@ -36,6 +36,7 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
+int find_source(void);
 
 int main(int argc, string argv[])
 {
@@ -44,7 +45,7 @@ int main(int argc, string argv[])
     char file_content[100][10];
 
     // fp = fopen("./votes.txt", "r");
-    if ((fp = fopen("./votes.txt", "r")) == NULL)
+    if ((fp = fopen("./votes4.txt", "r")) == NULL)
     {
         printf("ERROR");
         return(1);
@@ -227,12 +228,36 @@ void sort_pairs(void)
                         preferences[pairs[i].loser][pairs[i].winner];
 
 
-    // sort mrgins and map it to pairs
+    // sort margins and pairs
+    int i_curr = 0;
+    for (int i = i_curr; i < pair_count; i++)
+    {
+        for(int j = 0; j < pair_count; j++)
+        {
+            if (margin[j] < margin[i])
+            {
+                // swap margin & pairs
+                int tmp = margin[i];    pair tmp_pairs = pairs[i];
+                margin[i] = margin[j];  pairs[i] = pairs[j];
+                margin[j] = tmp;        pairs[j] = tmp_pairs;  
+                break;
+            }
+        }
+        i_curr++;
+    }
+
 
     // debug
     printf("\n");
     for (int i = 0; i < pair_count; i++)
         printf("%i, ", margin[i]);
+
+    printf("\n");
+    for (int i = 0; i < pair_count; i++)
+        printf("(%s, %s); ", candidates[pairs[i].winner], candidates[pairs[i].loser]);
+        // printf("(w = %i, l = %i); ", pairs[i].winner, pairs[i].loser);
+
+    printf("\n%i\n ", pair_count);
 
 
     return;
@@ -241,14 +266,49 @@ void sort_pairs(void)
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
-    // TODO
+    // find for source
+    int source = find_source();
+
+    // if source found - lock all pairs
+    if (source >= 0)
+        for (int i = 0; i < pair_count; i++)
+            locked[pairs[i].winner][pairs[i].loser] = true;
+
+    // if not - unlock one last
+    else
+        for (int i = 0; i < pair_count - 1; i++)
+            locked[pairs[i].winner][pairs[i].loser] = true;
+
+
+    // debug
+    printf("locked:\n");
+    for (int i = 0; i < candidate_count; i++)
+    {
+        printf("\n");
+        for (int j = 0; j < candidate_count; j++)
+            printf("%i   ", locked[i][j]);
+    }
     return;
 }
 
 // Print the winner of the election
 void print_winner(void)
 {
-    // TODO
+    int source = find_source();
+    printf("\n%s\n", candidates[source]);
     return;
 }
 
+// find source of graph (index - yes, -1 - no: cycle)
+int find_source(void)
+{
+    for (int j = 0; j < candidate_count; j++)
+    {
+        bool sum_j = false;
+        for (int i = 0; i < candidate_count; i++)
+            sum_j = sum_j || locked[i][j];
+        if (!sum_j)
+            return j;
+    }
+    return -1;
+} 
