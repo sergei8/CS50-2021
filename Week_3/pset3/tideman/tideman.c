@@ -36,7 +36,7 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
-int find_source(void);
+bool make_locks(int i);
 
 int main(int argc, string argv[])
 {
@@ -180,7 +180,7 @@ void sort_pairs(void)
     {
         for(int j = 0; j < pair_count; j++)
         {
-            if (margin[j] < margin[i])
+            if (margin[j] <= margin[i])
             {
                 // swap margin & pairs
                 int tmp = margin[i];    pair tmp_pairs = pairs[i];
@@ -198,21 +198,38 @@ void sort_pairs(void)
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
-    // find for source
-    int source = find_source();
-
-    // if source found - lock all pairs
-    if (source >= 0)
-        for (int i = 0; i < pair_count; i++)
+    for (int i = 0; i < pair_count; i++)
+    {
+        bool result = make_locks(i);
+        if (result)
             locked[pairs[i].winner][pairs[i].loser] = true;
-
-    // if not - unlock one last
-    else
-        for (int i = 0; i < pair_count - 1; i++)
-            locked[pairs[i].winner][pairs[i].loser] = true;
-    
+    }
     return;
 }
+
+bool make_locks(int i)
+{
+    for (int ii = 0; ii < pair_count; ii++)
+    {
+        // find where `i` loser is winner 
+        if (pairs[i].loser == pairs[ii].winner)
+        {
+            // check if pair locked
+            if (locked[pairs[ii].winner][pairs[ii].loser])
+            {
+                // check for cycle (when start winner == end looser)
+                if(pairs[ii].loser == pairs[i].winner)
+                    return false;
+                // else build chain
+                make_locks(ii);
+            }
+            else
+                return true;
+        }
+    }
+    return false;
+}
+
 
 // Print the winner of the election
 void print_winner(void)
@@ -226,20 +243,6 @@ void print_winner(void)
         if (!sum_j)
             printf("\n%s", candidates[j]);
     }
-    
     return;
 }
 
-// find source of graph (index - yes, -1 - no: cycle)
-int find_source(void)
-{
-    for (int j = 0; j < candidate_count; j++)
-    {
-        bool sum_j = false;
-        for (int i = 0; i < candidate_count; i++)
-            sum_j = sum_j || locked[i][j];
-        if (!sum_j)
-            return j;
-    }
-    return -1;
-} 

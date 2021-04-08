@@ -45,7 +45,7 @@ int main(int argc, string argv[])
     char file_content[100][10];
 
     // fp = fopen("./votes.txt", "r");
-    if ((fp = fopen("./votes4.txt", "r")) == NULL)
+    if ((fp = fopen("./votes.txt", "r")) == NULL)
     {
         printf("ERROR");
         return(1);
@@ -212,7 +212,7 @@ void add_pairs(void)
     for (int i = 0; i < pair_count; i++)
         printf("(w = %i, l = %i); ", pairs[i].winner, pairs[i].loser);
 
-    printf("\n%i\n ", pair_count);
+    // printf("\n%i\n ", pair_count);
 
     return;
 }
@@ -234,7 +234,7 @@ void sort_pairs(void)
     {
         for(int j = 0; j < pair_count; j++)
         {
-            if (margin[j] < margin[i])
+            if (margin[j] <= margin[i])
             {
                 // swap margin & pairs
                 int tmp = margin[i];    pair tmp_pairs = pairs[i];
@@ -257,7 +257,7 @@ void sort_pairs(void)
         // printf("(%s, %s); ", candidates[pairs[i].winner], candidates[pairs[i].loser]);
         printf("(%i, %i); ", pairs[i].winner, pairs[i].loser);
 
-    printf("\n%i\n ", pair_count);
+    // printf("\n%i\n ", pair_count);
 
 
     return;
@@ -266,9 +266,10 @@ void sort_pairs(void)
 // Lock pairs into the candidate graph in order, without creating cycles
 void lock_pairs(void)
 {
+
     for (int i = 0; i < pair_count; i++)
     {
-        printf("%i ****************\n", i);
+        printf("\n%i ****************\n", i);
         bool result = make_locks(i);
         if (result)
         {
@@ -300,7 +301,7 @@ bool make_locks(int i)
             if (locked[pairs[ii].winner][pairs[ii].loser])
             {
                 // check for cycle (when start winner == end looser)
-                if(pairs[i].winner == pairs[ii].loser)
+                if(pairs[ii].loser == pairs[i].winner)
                 {
                     printf("cycle found %i = %i", pairs[i].winner, pairs[ii].loser);
                     return false;
@@ -313,7 +314,6 @@ bool make_locks(int i)
                 return true;
         }
     }
-
     return false;
 }
 
@@ -322,6 +322,16 @@ bool make_locks(int i)
 // Print the winner of the election
 void print_winner(void)
 {
+    // find source of the graph - column with all `falses`
+    for (int j = 0; j < candidate_count; j++)
+    {
+        bool sum_j = false;
+        for (int i = 0; i < candidate_count; i++)
+            sum_j = sum_j || locked[i][j];
+        if (!sum_j)
+            printf("\n%s", candidates[j]);
+    }
+    
     return;
 }
 
