@@ -36,7 +36,7 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
-bool make_locks(int i);
+bool check_for_cycle(int start_pair_winner, int current_loser);
 
 int main(int argc, string argv[])
 {
@@ -91,8 +91,6 @@ int main(int argc, string argv[])
         }
 
         record_preferences(ranks);
-
-        printf("\n");
     }
 
     add_pairs();
@@ -175,22 +173,18 @@ void sort_pairs(void)
 
 
     // sort margins and pairs
-    int i_curr = 0;
-    for (int i = i_curr; i < pair_count; i++)
-    {
-        for(int j = 0; j < pair_count; j++)
+        for (int i = 0; i < pair_count; ++i) 
         {
-            if (margin[j] <= margin[i])
+            for (int j = i + 1; j < pair_count; ++j)
             {
-                // swap margin & pairs
-                int tmp = margin[i];    pair tmp_pairs = pairs[i];
-                margin[i] = margin[j];  pairs[i] = pairs[j];
-                margin[j] = tmp;        pairs[j] = tmp_pairs;  
-                break;
+                if (margin[i] <= margin[j]) 
+                {
+                    int tmp = margin[i];    pair tmp_pairs = pairs[i];
+                    margin[i] = margin[j];  pairs[i] = pairs[j];
+                    margin[j] = tmp;        pairs[j] = tmp_pairs;  
+                }
             }
         }
-        i_curr++;
-    }
 
     return;
 }
@@ -200,33 +194,30 @@ void lock_pairs(void)
 {
     for (int i = 0; i < pair_count; i++)
     {
-        bool result = make_locks(i);
-        if (result)
-            locked[pairs[i].winner][pairs[i].loser] = true;
+        locked[pairs[i].winner][pairs[i].loser] = !check_for_cycle(pairs[i].winner, pairs[i].loser);
     }
+    
     return;
 }
 
-bool make_locks(int i)
+bool check_for_cycle(int start_pair_winner, int current_loser)
 {
-    for (int ii = 0; ii < pair_count; ii++)
+    if (current_loser == start_pair_winner)
     {
-        // find where `i` loser is winner 
-        if (pairs[i].loser == pairs[ii].winner)
-        {
-            // check if pair locked
-            if (locked[pairs[ii].winner][pairs[ii].loser])
-            {
-                // check for cycle (when start winner == end looser)
-                if(pairs[ii].loser == pairs[i].winner)
-                    return false;
-                // else build chain
-                make_locks(ii);
-            }
-            else
-                return true;
-        }
+        return true;
     }
+
+    for (int i = 0; i < candidate_count; i++)
+    {
+        if (locked[current_loser][i])
+        {
+            if (check_for_cycle(start_pair_winner, i))
+            {
+                return true;
+            }
+        }
+    }    
+
     return false;
 }
 
