@@ -36,7 +36,7 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
-bool make_locks(int i);
+bool check_for_cycle(int i);
 
 int main(int argc, string argv[])
 {
@@ -45,7 +45,7 @@ int main(int argc, string argv[])
     char file_content[100][10];
 
     // fp = fopen("./votes.txt", "r");
-    if ((fp = fopen("./votes.txt", "r")) == NULL)
+    if ((fp = fopen("./test10.txt", "r")) == NULL)
     {
         printf("ERROR");
         return(1);
@@ -98,7 +98,6 @@ int main(int argc, string argv[])
     pair_count = 0;
     int voter_count = get_int("Number of voters: ");
 
-    int vc = 0;
     // Query for votes
     for (int i = 0; i < voter_count; i++)
     {
@@ -106,12 +105,12 @@ int main(int argc, string argv[])
         int ranks[candidate_count];
 
         // Query for each rank
-        for (int j = 0; j < candidate_count; j++, vc++)
+        for (int j = 0; j < candidate_count; j++)
         {
             // ---------------------------------------------------
-            // string name = get_string("Rank %i: ", j + 1);
-            string name = file_content[vc];
-            printf("Rank %i: %s\n", j + 1, name);
+            string name = get_string("Rank %i: ", j + 1);
+            // string name = file_content[vc];
+            // printf("Rank %i: %s\n", j + 1, name);
             // ---------------------------------------------------
 
             if (!vote(j, name, ranks))
@@ -227,39 +226,39 @@ void sort_pairs(void)
             margin[i] = preferences[pairs[i].winner][pairs[i].loser] -
                         preferences[pairs[i].loser][pairs[i].winner];
 
+    // debug
+    printf("\n***BEFORE SORT\n");
+    for (int i = 0; i < pair_count; i++)
+        printf("%i, ", margin[i]);
 
-    // sort margins and pairs
-    int i_curr = 0;
-    for (int i = i_curr; i < pair_count; i++)
-    {
-        for(int j = 0; j < pair_count; j++)
+        for (int i = 0; i < pair_count; ++i) 
         {
-            if (margin[j] <= margin[i])
+            for (int j = i + 1; j < pair_count; ++j)
             {
-                // swap margin & pairs
-                int tmp = margin[i];    pair tmp_pairs = pairs[i];
-                margin[i] = margin[j];  pairs[i] = pairs[j];
-                margin[j] = tmp;        pairs[j] = tmp_pairs;  
-                break;
+                if (margin[i] <= margin[j]) 
+                {
+                    int tmp = margin[i];    pair tmp_pairs = pairs[i];
+                    margin[i] = margin[j];  pairs[i] = pairs[j];
+                    margin[j] = tmp;        pairs[j] = tmp_pairs;  
+                }
             }
         }
-        i_curr++;
-    }
 
 
     // debug
-    printf("\n");
+    printf("\n***AFTER SORT\n");
     for (int i = 0; i < pair_count; i++)
         printf("%i, ", margin[i]);
+
+        // exit(0);
+
 
     printf("\n");
     for (int i = 0; i < pair_count; i++)
         // printf("(%s, %s); ", candidates[pairs[i].winner], candidates[pairs[i].loser]);
         printf("(%i, %i); ", pairs[i].winner, pairs[i].loser);
 
-    // printf("\n%i\n ", pair_count);
-
-
+    
     return;
 }
 
@@ -269,15 +268,9 @@ void lock_pairs(void)
 
     for (int i = 0; i < pair_count; i++)
     {
-        printf("\n%i ****************\n", i);
-        bool result = make_locks(i);
-        if (result)
-        {
-            printf("lock pair %i\n", i);
-            locked[pairs[i].winner][pairs[i].loser] = true;
-        }
+        printf("\n**** %i", i);
+        locked[pairs[i].winner][pairs[i].loser] = check_for_cycle(i);
     }
-
 
     // debug
     for (int i = 0; i < candidate_count; i++)
@@ -288,30 +281,25 @@ void lock_pairs(void)
         }
 
     return;
+
+
 }
 
-bool make_locks(int i)
+bool check_for_cycle(int i)
 {
     for (int ii = 0; ii < pair_count; ii++)
     {
-        // find where `i` loser is winner 
         if (pairs[i].loser == pairs[ii].winner)
         {
-            // check if pair locked
             if (locked[pairs[ii].winner][pairs[ii].loser])
             {
-                // check for cycle (when start winner == end looser)
-                if(pairs[ii].loser == pairs[i].winner)
-                {
-                    printf("cycle found %i = %i", pairs[i].winner, pairs[ii].loser);
-                    return false;
-                }
-                // else build chain
-                printf("%i chain\n", ii);
-                make_locks(ii);
+                // printf("\ncycle %i", ii);
+                check_for_cycle(ii);
             }
-            else
+            else 
+            {
                 return true;
+            }
         }
     }
     return false;
