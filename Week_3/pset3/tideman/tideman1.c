@@ -36,7 +36,7 @@ void lock_pairs(void);
 void print_winner(void);
 int get_candidate_position(string name);
 void update_rank(int rank, int ranks[]);
-bool check_for_cycle(int i);
+bool check_for_cycle(int start_pair_winner, int current_loser);
 
 int main(int argc, string argv[])
 {
@@ -269,7 +269,7 @@ void lock_pairs(void)
     for (int i = 0; i < pair_count; i++)
     {
         printf("\n**** %i", i);
-        locked[pairs[i].winner][pairs[i].loser] = check_for_cycle(i);
+        locked[pairs[i].winner][pairs[i].loser] = !check_for_cycle(pairs[i].winner, pairs[i].loser);
     }
 
     // debug
@@ -285,24 +285,43 @@ void lock_pairs(void)
 
 }
 
-bool check_for_cycle(int i)
+bool check_for_cycle(int start_pair_winner, int current_loser)
 {
-    for (int ii = 0; ii < pair_count; ii++)
+    // for (int ii = 0; ii < pair_count; ii++)
+    // {
+    //     if (pairs[i].loser == pairs[ii].winner)
+    //     {
+    //         if (locked[pairs[ii].winner][pairs[ii].loser])
+    //         {
+    //             // printf("\ncycle %i", ii);
+    //             check_for_cycle(ii);
+    //         }
+    //         else 
+    //         {
+    //             return true;
+    //         }
+    //     }
+    // }
+    // return false;
+
+    if (current_loser == start_pair_winner)
     {
-        if (pairs[i].loser == pairs[ii].winner)
+        return true;
+    }
+
+    for (int i = 0; i < candidate_count; i++)
+    {
+        if (locked[current_loser][i])
         {
-            if (locked[pairs[ii].winner][pairs[ii].loser])
-            {
-                // printf("\ncycle %i", ii);
-                check_for_cycle(ii);
-            }
-            else 
+            if (check_for_cycle(start_pair_winner, i))
             {
                 return true;
             }
         }
-    }
+    }    
+
     return false;
+
 }
 
 
