@@ -3,9 +3,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-// #include <cs50.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 void copy_header(FILE* input, FILE* output);
 void update_volume(FILE* input, FILE* output, float factor);
@@ -40,7 +37,7 @@ int main(int argc, char *argv[])
     float factor = atof(argv[3]);
 
     // Copy header from input file to output file
-    // copy_header(input, output);
+    copy_header(input, output);
 
     // Read samples from input file and write updated data to output file
     update_volume(input, output, factor);
@@ -53,32 +50,20 @@ int main(int argc, char *argv[])
 // Copy header from input file to output file
 void copy_header(FILE* input, FILE* output)
 {
-    for (int i = 0; i <= 10; i++)
-    {
-        char c = fgetc(input);
-        fputc(c, output);
-    }
+    int *header = malloc(HEADER_SIZE);
+    fread(header, HEADER_SIZE, 1, input);
+    fwrite(header, HEADER_SIZE, 1, output);
+    free(header);
 }
 
+// Read samples from input file and write updated data to output file
 void update_volume(FILE *input, FILE *output, float factor)
 {
-    int16_t samp, ss;
+    int16_t samp;
 
-    fread(&samp, 2, 1, input);
-    ss = (int16_t)(samp * factor); 
-    printf("samp = %d, &samp = %p, ss = %d, factor = %f\n", samp, &samp, ss, factor);
-
-    return;
-
-    
-    
-    
-    // do 
-    // {
-    //     fread(&samp, 2, 1, input);
-    //     float ss = (samp * factor); 
-    //     printf("%i -> %f", ss, samp);
-    //     // int16_t s = (int16_t) ((float)samp * factor); 
-    //     // fwrite(&ss, 2, 1, output);
-    // } while(!feof(input));
+    while(fread(&samp, sizeof(samp), 1, input))
+    {
+        samp = (int16_t)(samp * factor); 
+        fwrite(&samp, 2, 1, output);
+    }
 }
