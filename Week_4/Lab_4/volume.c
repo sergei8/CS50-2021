@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     float factor = atof(argv[3]);
 
     // Copy header from input file to output file
-    copy_header(input, output);
+    // copy_header(input, output);
 
     // Read samples from input file and write updated data to output file
     update_volume(input, output, factor);
@@ -53,20 +53,32 @@ int main(int argc, char *argv[])
 // Copy header from input file to output file
 void copy_header(FILE* input, FILE* output)
 {
-    for (int i = 0; i <= HEADER_SIZE; i++)
+    for (int i = 0; i <= 10; i++)
     {
         char c = fgetc(input);
         fputc(c, output);
     }
 }
 
-void update_volume(FILE* input, FILE* output, float factor)
+void update_volume(FILE *input, FILE *output, float factor)
 {
-    int16_t *samp = malloc(2);
-    do 
-    {
-        fread(samp, sizeof(int16_t), 1, input);
-        int16_t s = (int16_t) ((float)samp * factor); 
-        fwrite(samp, sizeof(int16_t), 1, output);
-    } while(!feof(input));
+    int16_t samp, ss;
+
+    fread(&samp, 2, 1, input);
+    ss = (int16_t)(samp * factor); 
+    printf("samp = %d, &samp = %p, ss = %d, factor = %f\n", samp, &samp, ss, factor);
+
+    return;
+
+    
+    
+    
+    // do 
+    // {
+    //     fread(&samp, 2, 1, input);
+    //     float ss = (samp * factor); 
+    //     printf("%i -> %f", ss, samp);
+    //     // int16_t s = (int16_t) ((float)samp * factor); 
+    //     // fwrite(&ss, 2, 1, output);
+    // } while(!feof(input));
 }
