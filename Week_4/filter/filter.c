@@ -100,8 +100,6 @@ int main(int argc, char *argv[])
 
     // Filter image
 
-    printf("%c\n",  filter);
-
     switch (filter)
     {
         // Blur
