@@ -1,11 +1,6 @@
 #include "helpers.h"
 #include <stdio.h>
 
-// lengths of the arrays of the next pixels
-int CORNER_LEN = 4;
-int EDGE_LEN   = 6;
-int MIDDLE_LEN = 9;
-
 // prototypes
 void top_left(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void top_right(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
@@ -77,7 +72,10 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
     middle(height, width, image, blur_image);
 
     // fill `image` with `blur_image`
-    image = blur_image;
+    for (int i = 0; i < height; i++)
+        for(int j = 0; j < width; j++)
+            image[i][j] = blur_image[i][j];
+
     
     return;
 }
