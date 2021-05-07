@@ -11,6 +11,11 @@ void top_left(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void top_right(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void bottom_left(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void bottom_right(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
+void left_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
+void right_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
+void top_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
+void bottom_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
+void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
@@ -53,7 +58,7 @@ void reflect(int height, int width, RGBTRIPLE image[height][width])
 // Blur image
 void blur(int height, int width, RGBTRIPLE image[height][width])
 {
-    // allocate spce for blured image
+    // allocate space for the blured image
     RGBTRIPLE blur_image[height][width];
 
     // make image corners
@@ -62,11 +67,17 @@ void blur(int height, int width, RGBTRIPLE image[height][width])
     bottom_left(height, width, image, blur_image);
     bottom_right(height, width, image, blur_image);
 
-    // TODO make image edges
+    // make image edges
+    left_edge(height, width, image, blur_image);
+    right_edge(height, width, image, blur_image);
+    top_edge(height, width, image, blur_image);
+    bottom_edge(height, width, image, blur_image);
 
-    // TODO make image middle pixels
+    // make image middle pixels
+    middle(height, width, image, blur_image);
 
-    // TODO fill `image` with `blur_image`
+    // fill `image` with `blur_image`
+    image = blur_image;
     
     return;
 }
@@ -161,4 +172,167 @@ void bottom_right(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w
                                  image[h][w-1].rgbtGreen) / 4;
 
     return;
+}
+
+// left edge
+void left_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w])
+{
+    for (int i = 1; i < h - 1; i++)
+    {
+        blur_image[i][0].rgbtRed =  (image[i-1][0].rgbtRed +
+                                    image[i-1][1].rgbtRed +  
+                                    image[i][0].rgbtRed +
+                                    image[i][1].rgbtRed +
+                                    image[i+1][0].rgbtRed +
+                                    image[i+1][1].rgbtRed) / 6;
+
+        blur_image[i][0].rgbtBlue =  (image[i-1][0].rgbtBlue +
+                                    image[i-1][1].rgbtBlue +  
+                                    image[i][0].rgbtBlue +
+                                    image[i][1].rgbtBlue +
+                                    image[i+1][0].rgbtBlue +
+                                    image[i+1][1].rgbtBlue) / 6;
+
+        blur_image[i][0].rgbtGreen =  (image[i-1][0].rgbtGreen +
+                                    image[i-1][1].rgbtGreen +  
+                                    image[i][0].rgbtGreen +
+                                    image[i][1].rgbtGreen +
+                                    image[i+1][0].rgbtGreen +
+                                    image[i+1][1].rgbtGreen) / 6;
+    }
+    
+    return;
+}
+
+// right edge
+void right_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w])
+{
+    for (int i = 1; i < h - 1; i++)
+    {
+        blur_image[i][w].rgbtRed =  (image[i-1][w-1].rgbtRed +
+                                    image[i-1][w].rgbtRed +  
+                                    image[i][w-1].rgbtRed +
+                                    image[i][w].rgbtRed +
+                                    image[i+1][w-1].rgbtRed +
+                                    image[i+1][w].rgbtRed) / 6;
+
+        blur_image[i][w].rgbtBlue =  (image[i-1][w-1].rgbtBlue +
+                                    image[i-1][w].rgbtBlue +  
+                                    image[i][w-1].rgbtBlue +
+                                    image[i][w].rgbtBlue +
+                                    image[i+1][w-1].rgbtBlue +
+                                    image[i+1][w].rgbtBlue) / 6;
+
+        blur_image[i][w].rgbtGreen =  (image[i-1][w-1].rgbtGreen +
+                                    image[i-1][w].rgbtGreen +  
+                                    image[i][w-1].rgbtGreen +
+                                    image[i][w].rgbtGreen +
+                                    image[i+1][w-1].rgbtGreen +
+                                    image[i+1][w].rgbtGreen) / 6;
+    }
+    
+    return;
+}
+
+// top edge
+void top_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w])
+{
+    for (int j = 1; j < w - 1; j++)
+    {
+        blur_image[0][j].rgbtRed =  (image[0][j-1].rgbtRed +
+                                    image[0][j].rgbtRed +  
+                                    image[0][j+1].rgbtRed +
+                                    image[1][j-1].rgbtRed +
+                                    image[1][j].rgbtRed +
+                                    image[1][j+1].rgbtRed) / 6;
+
+        blur_image[0][j].rgbtBlue =  (image[0][j-1].rgbtBlue +
+                                    image[0][j].rgbtBlue +  
+                                    image[0][j+1].rgbtBlue +
+                                    image[1][j-1].rgbtBlue +
+                                    image[1][j].rgbtBlue +
+                                    image[1][j+1].rgbtBlue) / 6;
+
+        blur_image[0][j].rgbtGreen =  (image[0][j-1].rgbtGreen +
+                                    image[0][j].rgbtGreen +  
+                                    image[0][j+1].rgbtGreen +
+                                    image[1][j-1].rgbtGreen +
+                                    image[1][j].rgbtGreen +
+                                    image[1][j+1].rgbtGreen) / 6;
+    }
+    
+    return;
+}
+
+// bottom edge
+void bottom_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w])
+{
+    h--;
+    for (int j = 1; j < w - 1; j++)
+    {
+        blur_image[h][j].rgbtRed =  (image[h-1][j-1].rgbtRed +
+                                    image[h-1][j].rgbtRed +  
+                                    image[h-1][j+1].rgbtRed +
+                                    image[h][j-1].rgbtRed +
+                                    image[h][j].rgbtRed +
+                                    image[h][j+1].rgbtRed) / 6;
+
+        blur_image[h][j].rgbtBlue =  (image[h-1][j-1].rgbtBlue +
+                                    image[h-1][j].rgbtBlue +  
+                                    image[h-1][j+1].rgbtBlue +
+                                    image[h][j-1].rgbtBlue +
+                                    image[h][j].rgbtBlue +
+                                    image[h][j+1].rgbtBlue) / 6;
+
+        blur_image[h][j].rgbtGreen =  (image[h-1][j-1].rgbtGreen +
+                                    image[h-1][j].rgbtGreen +  
+                                    image[h-1][j+1].rgbtGreen +
+                                    image[h][j-1].rgbtGreen +
+                                    image[h][j].rgbtGreen +
+                                    image[h][j+1].rgbtGreen) / 6;
+
+    }
+    
+    return;
+}
+
+//  middle pixels
+void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w])
+{
+    printf("%i  %i\n", h, w);
+
+    for (int i = 1; i < h; i++){
+        for (int j = 1; j < w; j++)
+        {
+            blur_image[i][j].rgbtRed =  (image[i-1][j-1].rgbtRed +
+                            image[i-1][j].rgbtRed +  
+                            image[i-1][j+1].rgbtRed +
+                            image[i][j-1].rgbtRed +
+                            image[i][j].rgbtRed +
+                            image[i][j+1].rgbtRed + 
+                            image[i+1][j-1].rgbtRed + 
+                            image[i+1][j].rgbtRed + 
+                            image[i+1][j+1].rgbtRed) / 9; 
+
+            blur_image[i][j].rgbtBlue =  (image[i-1][j-1].rgbtBlue +
+                            image[i-1][j].rgbtBlue +  
+                            image[i-1][j+1].rgbtBlue +
+                            image[i][j-1].rgbtBlue +
+                            image[i][j].rgbtBlue +
+                            image[i][j+1].rgbtBlue + 
+                            image[i+1][j-1].rgbtBlue + 
+                            image[i+1][j].rgbtBlue + 
+                            image[i+1][j+1].rgbtBlue) / 9; 
+
+            blur_image[i][j].rgbtGreen =  (image[i-1][j-1].rgbtGreen +
+                            image[i-1][j].rgbtGreen +  
+                            image[i-1][j+1].rgbtGreen +
+                            image[i][j-1].rgbtGreen +
+                            image[i][j].rgbtGreen +
+                            image[i][j+1].rgbtGreen + 
+                            image[i+1][j-1].rgbtGreen + 
+                            image[i+1][j].rgbtGreen + 
+                            image[i+1][j+1].rgbtGreen) / 9; 
+        }
+    }
 }
