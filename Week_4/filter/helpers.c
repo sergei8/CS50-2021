@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include <stdio.h>
+#include <math.h>
 
 // prototypes
 void top_left(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
@@ -16,24 +17,21 @@ void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
 {
    for (int h = 0; h <= height - 1; h++)
-   {
        for (int w = 0; w <= width - 1; w++)
        {
-           // calculate average of RGB
-           BYTE avg = (BYTE) ((image[h][w].rgbtBlue + image[h][w].rgbtGreen + image[h][w].rgbtRed) / 3);
+           // calculate average of RGB rounded as float
+           BYTE avg = (BYTE) round((image[h][w].rgbtBlue + image[h][w].rgbtGreen + image[h][w].rgbtRed) / 3.0);
           // change pixel to gray
            image[h][w].rgbtBlue  = avg;  
            image[h][w].rgbtGreen = avg;  
            image[h][w].rgbtRed   = avg;  
        }
-   }
    return;
 }
 
 // Reflect image horizontally
 void reflect(int height, int width, RGBTRIPLE image[height][width])
 {
-    printf ("%i %i\n", height, width);
     int w, h, j;
     for (h = 0; h < height; h++)
     {
@@ -44,8 +42,6 @@ void reflect(int height, int width, RGBTRIPLE image[height][width])
             image[h][j]   = tmp;
         }
     }
-    
-    printf ("%i %i %i\n", h, w, j);
 
     return;
 }
