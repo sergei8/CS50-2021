@@ -14,7 +14,7 @@ void bottom_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]
 void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 
 void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
-int compute_Gxy(int cannel_value);
+RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3]);
 
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
@@ -354,19 +354,28 @@ void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w
     for (int i = 1; i < h - 1; i++){
         for (int j = 1; j < w -1; j++)
         {
-            edge_image[i][j].rgbtRed    =  compute_Gxy(image[i][j].rgbtRed);
-            edge_image[i][j].rgbtBlue   =  compute_Gxy(image[i][j].rgbtBlue);
-            edge_image[i][j].rgbtGreen  =  compute_Gxy(image[i][j].rgbtGreen);
+            RGBTRIPLE region[3][3] = 
+            {
+                {image[i-1][j-1], image[i-1][j], image[i-1][j+1]},
+                {image[i][j-1],   image[i][j],   image[i][j+1]},
+                {image[i+1][j-1], image[i+1][j], image[i+1][j+1]}
+            };
+            
+            edge_image[i][j] = compute_Gxy(region);
 
         }
     }
 }
 
+
+
 // compute edge value
-int compute_Gxy(int cannel_value)
+RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3])
 {
     // convolution matrix (kernels)    
     
+    RGBTRIPLE edge_pixel;
+
     int Gx[3][3] = 
     {
         {-1, 0, 1},
@@ -381,20 +390,29 @@ int compute_Gxy(int cannel_value)
         { 1,  2,  1}
     };
 
-    int sum_Gx = 0;
-    int sum_Gy = 0;
+    int sum_Gx_red = 0;     int sum_Gy_red = 0;
+    int sum_Gx_blue = 0;    int sum_Gy_blue = 0;
+    int sum_Gx_green = 0;   int sum_Gy_green = 0;
     
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
         {
-            sum_Gx += cannel_value * Gx[i][j];
-            sum_Gy += cannel_value * Gy[i][j];
+            sum_Gx_red      += region[i][j].rgbtRed * Gx[i][j];
+            sum_Gy_red      += region[i][j].rgbtRed * Gy[i][j];
+            sum_Gx_blue     += region[i][j].rgbtBlue * Gx[i][j];
+            sum_Gy_blue     += region[i][j].rgbtBlue * Gy[i][j];
+            sum_Gx_green    += region[i][j].rgbtGreen * Gx[i][j];
+            sum_Gx_green    += region[i][j].rgbtGreen * Gy[i][j];
         }
 
-    int edge_value = round(sqrt(sum_Gx ^ 2 + sum_Gy ^ 2));
-    printf("%i ", sum_Gx);
+    edge_pixel.rgbtRed      = round(sqrt(sum_Gx_red ^ 2 + sum_Gy_red ^ 2));
+    edge_pixel.rgbtBlue     = round(sqrt(sum_Gx_blue ^ 2 + sum_Gy_blue ^ 2));
+    edge_pixel.rgbtGreen    = round(sqrt(sum_Gx_green ^ 2 + sum_Gy_green ^ 2));
 
-    if (edge_value > 255) edge_value = 255;
+    if (edge_pixel.rgbtRed   > 255) edge_pixel.rgbtRed = 255;
+    if (edge_pixel.rgbtBlue  > 255) edge_pixel.rgbtBlue = 255;
+    if (edge_pixel.rgbtGreen > 255) edge_pixel.rgbtGreen = 255;
     
-    return edge_value;
+    
+    return edge_pixel;
 }
