@@ -15,6 +15,13 @@ void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 
 void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3]);
+void top_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
+void top_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
+void bottom_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
+void bottom_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
+
+// `virtual` (unborded) pixcel color
+RGBTRIPLE unborded_pixel;
 
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
@@ -88,6 +95,12 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
  
     // make middle edges
     middle_edges(height, width, image, edge_image);
+
+    // make corbers edges
+    top_left_edged_corner(height, width, image, edge_image);
+    top_right_edged_corner(height, width, image, edge_image);
+    bottom_left_edged_corner(height, width, image, edge_image);
+    bottom_right_edged_corner(height, width, image, edge_image);
 
 
     // fill `image` with `edge_image`
@@ -362,9 +375,68 @@ void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w
             };
             
             edge_image[i][j] = compute_Gxy(region);
-
         }
     }
+}
+
+// edge top left corner
+void top_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
+{
+    unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+
+    RGBTRIPLE region[3][3] = 
+    {
+        {unborded_pixel, unborded_pixel, unborded_pixel},
+        {unborded_pixel, image[0][0],   image[0][1]},
+        {unborded_pixel, image[1][0], image[1][1]}
+    };
+            
+    edge_image[0][0] = compute_Gxy(region);
+}
+
+// edge top right corner
+void top_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
+{
+    unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+
+    RGBTRIPLE region[3][3] = 
+    {
+        {unborded_pixel, unborded_pixel, unborded_pixel},
+        {image[0][w-1], image[0][w], unborded_pixel},
+        {image[1][w-1], image[1][w], unborded_pixel}
+    };
+            
+    edge_image[0][w] = compute_Gxy(region);
+}
+
+// edge bottom left corner
+void bottom_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
+{
+    unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+
+    RGBTRIPLE region[3][3] = 
+    {
+        {unborded_pixel, image[h-1][0], image[h-1][1]},
+        {unborded_pixel, image[h][0], image[h][1]},
+        {unborded_pixel, unborded_pixel, unborded_pixel}
+    };
+            
+    edge_image[0][w] = compute_Gxy(region);
+}
+
+// edge bottom right corner
+void bottom_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
+{
+    unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+
+    RGBTRIPLE region[3][3] = 
+    {
+        {image[h-1][w-1], image[h-1][w], unborded_pixel},
+        {image[h][w-1], image[h][w], unborded_pixel},
+        {unborded_pixel, unborded_pixel, unborded_pixel}
+    };
+            
+    edge_image[0][w] = compute_Gxy(region);
 }
 
 
@@ -405,14 +477,13 @@ RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3])
             sum_Gx_green    += region[i][j].rgbtGreen * Gy[i][j];
         }
 
-    edge_pixel.rgbtRed      = round(sqrt(sum_Gx_red ^ 2 + sum_Gy_red ^ 2));
-    edge_pixel.rgbtBlue     = round(sqrt(sum_Gx_blue ^ 2 + sum_Gy_blue ^ 2));
-    edge_pixel.rgbtGreen    = round(sqrt(sum_Gx_green ^ 2 + sum_Gy_green ^ 2));
+    edge_pixel.rgbtRed      = round(sqrt(pow(sum_Gx_red, 2) + pow(sum_Gy_red, 2)));
+    edge_pixel.rgbtBlue     = round(sqrt(pow(sum_Gx_blue, 2) + pow(sum_Gy_blue, 2)));
+    edge_pixel.rgbtGreen    = round(sqrt(pow(sum_Gx_green, 2) + pow(sum_Gy_green, 2)));
 
     if (edge_pixel.rgbtRed   > 255) edge_pixel.rgbtRed = 255;
     if (edge_pixel.rgbtBlue  > 255) edge_pixel.rgbtBlue = 255;
     if (edge_pixel.rgbtGreen > 255) edge_pixel.rgbtGreen = 255;
-    
     
     return edge_pixel;
 }
