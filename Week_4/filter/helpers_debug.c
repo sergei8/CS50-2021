@@ -13,8 +13,8 @@ void top_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void bottom_edge(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void middle(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 
-void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3]);
+void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE blur_image[h][w]);
 void top_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
 void top_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
 void bottom_left_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
@@ -24,7 +24,7 @@ void edge_left_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[
 void edge_right_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
 void edge_bottom_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w]);
 
-// `virtual` (unborded) pixcel color
+// `virtual` (unborded) pixel color
 RGBTRIPLE unborded_pixel;
 
 // Convert image to grayscale
@@ -97,19 +97,19 @@ void edges(int height, int width, RGBTRIPLE image[height][width])
     RGBTRIPLE edge_image[height][width];
 
     // make middle edges
-    middle_edges(height, width, image, edge_image);
+    // middle_edges(height, width, image, edge_image);
 
     // make edged borders
-    edge_top_border(height, width, image, edge_image);
+    // edge_top_border(height, width, image, edge_image);
     edge_left_border(height, width, image, edge_image);
-    edge_bottom_border(height, width, image, edge_image);
-    edge_right_border(height, width, image, edge_image);
+    // edge_bottom_border(height, width, image, edge_image);
+    // edge_right_border(height, width, image, edge_image);
 
-    // make corbers edges
-    top_left_edged_corner(height, width, image, edge_image);
-    top_right_edged_corner(height, width, image, edge_image);
-    bottom_left_edged_corner(height, width, image, edge_image);
-    bottom_right_edged_corner(height, width, image, edge_image);
+    // // make corbers edges
+    // top_left_edged_corner(height, width, image, edge_image);
+    // top_right_edged_corner(height, width, image, edge_image);
+    // bottom_left_edged_corner(height, width, image, edge_image);
+    // bottom_right_edged_corner(height, width, image, edge_image);
 
 
     // fill `image` with `edge_image`
@@ -375,6 +375,18 @@ void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w
     for (int i = 1; i < h - 1; i++){
         for (int j = 1; j < w -1; j++)
         {
+                image[i-1][j-1] =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 25};
+                image[i-1][j]   =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 30};
+                image[i-1][j+1] =   (RGBTRIPLE) {.rgbtRed = 40, .rgbtGreen = 60, .rgbtBlue  = 80};
+                
+                image[i][j-1]   =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 30, .rgbtBlue  = 90};
+                image[i][j]     =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 40, .rgbtBlue  = 100};
+                image[i][j+1]   =   (RGBTRIPLE) {.rgbtRed = 80, .rgbtGreen = 70, .rgbtBlue  = 90};
+
+                image[i+1][j-1] =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 20, .rgbtBlue  = 40};
+                image[i+1][j]   =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 10, .rgbtBlue  = 30};
+                image[i+1][j+1] =   (RGBTRIPLE) {.rgbtRed = 50, .rgbtGreen = 40, .rgbtBlue  = 10}; 
+            
             RGBTRIPLE region[3][3] = 
             {
                 {image[i-1][j-1], image[i-1][j], image[i-1][j+1]},
@@ -382,7 +394,10 @@ void middle_edges(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w
                 {image[i+1][j-1], image[i+1][j], image[i+1][j+1]}
             };
             
+            printf("(%i %i %i)\n", image[i][j].rgbtRed, image[i][j].rgbtGreen, image[i][j].rgbtBlue);
             edge_image[i][j] = compute_Gxy(region);
+            printf("(%i %i %i)\n", edge_image[i][j].rgbtRed, edge_image[i][j].rgbtGreen, edge_image[i][j].rgbtBlue);
+            return;
         }
     }
 }
@@ -451,6 +466,25 @@ void bottom_right_edged_corner(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE ed
 void edge_top_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
 {
     unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+    
+    printf("top border");
+    for (int i = 1; i < h - 1; i++){
+        for (int j = 1; j < w -1; j++)
+        {
+            image[i-1][j-1] =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 25};
+            image[i-1][j]   =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 30};
+            image[i-1][j+1] =   (RGBTRIPLE) {.rgbtRed = 40, .rgbtGreen = 60, .rgbtBlue  = 80};
+            
+            image[i][j-1]   =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 30, .rgbtBlue  = 90};
+            image[i][j]     =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 40, .rgbtBlue  = 100};
+            image[i][j+1]   =   (RGBTRIPLE) {.rgbtRed = 80, .rgbtGreen = 70, .rgbtBlue  = 90};
+
+            image[i+1][j-1] =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 20, .rgbtBlue  = 40};
+            image[i+1][j]   =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 10, .rgbtBlue  = 30};
+            image[i+1][j+1] =   (RGBTRIPLE) {.rgbtRed = 50, .rgbtGreen = 40, .rgbtBlue  = 10}; 
+
+        }
+    }
 
     for (int j = 1; j < w - 1; j++)
     {    
@@ -461,7 +495,10 @@ void edge_top_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h
             {image[1][j-1], image[1][j], image[1][j+1]}
         };
         
+        printf("(%i %i %i)\n", image[0][j].rgbtRed, image[0][j].rgbtGreen, image[0][j].rgbtBlue);
         edge_image[0][j] = compute_Gxy(region);
+        printf("(%i %i %i)\n", edge_image[0][j].rgbtRed, edge_image[0][j].rgbtGreen, edge_image[0][j].rgbtBlue);
+        return;
     }
 }
 
@@ -469,6 +506,24 @@ void edge_top_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h
 void edge_left_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[h][w])
 {
     unborded_pixel.rgbtRed = unborded_pixel.rgbtBlue = unborded_pixel.rgbtGreen = 0;
+
+    for (int i = 1; i < h - 1; i++){
+        for (int j = 1; j < w -1; j++)
+        {
+            image[i-1][j-1] =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 25};
+            image[i-1][j]   =   (RGBTRIPLE) {.rgbtRed = 0, .rgbtGreen = 10, .rgbtBlue  = 30};
+            image[i-1][j+1] =   (RGBTRIPLE) {.rgbtRed = 40, .rgbtGreen = 60, .rgbtBlue  = 80};
+            
+            image[i][j-1]   =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 30, .rgbtBlue  = 90};
+            image[i][j]     =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 40, .rgbtBlue  = 100};
+            image[i][j+1]   =   (RGBTRIPLE) {.rgbtRed = 80, .rgbtGreen = 70, .rgbtBlue  = 90};
+
+            image[i+1][j-1] =   (RGBTRIPLE) {.rgbtRed = 20, .rgbtGreen = 20, .rgbtBlue  = 40};
+            image[i+1][j]   =   (RGBTRIPLE) {.rgbtRed = 30, .rgbtGreen = 10, .rgbtBlue  = 30};
+            image[i+1][j+1] =   (RGBTRIPLE) {.rgbtRed = 50, .rgbtGreen = 40, .rgbtBlue  = 10}; 
+
+        }
+    }
 
     for (int i = 1; i < h - 1; i++)
     {    
@@ -479,7 +534,10 @@ void edge_left_border(int h, int w, RGBTRIPLE image[h][w], RGBTRIPLE edge_image[
             {unborded_pixel, image[i+1][0], image[i+1][1]}
         };
         
+        printf("(%i %i %i)\n", image[i][0].rgbtRed, image[i][0].rgbtGreen, image[i][0].rgbtBlue);
         edge_image[i][0] = compute_Gxy(region);
+        printf("(%i %i %i)\n", edge_image[i][0].rgbtRed, edge_image[i][0].rgbtGreen, edge_image[i][0].rgbtBlue);
+        return;
     }
 }
 
@@ -526,6 +584,8 @@ RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3])
 {
     // convolution matrix (kernels)    
     
+    // printf("calculate\n");
+
     RGBTRIPLE edge_pixel;
 
     int Gx[3][3] = 
@@ -539,7 +599,7 @@ RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3])
     {
         {-1, -2, -1},
         {0,   0,  0},
-        { 1,  2,  1}
+        {1,   2,  1}
     };
 
     int sum_Gx_red = 0;     int sum_Gy_red = 0;
@@ -560,6 +620,10 @@ RGBTRIPLE compute_Gxy(RGBTRIPLE region[3][3])
     edge_pixel.rgbtRed      = round(sqrt(pow(sum_Gx_red, 2) + pow(sum_Gy_red, 2)));
     edge_pixel.rgbtBlue     = round(sqrt(pow(sum_Gx_blue, 2) + pow(sum_Gy_blue, 2)));
     edge_pixel.rgbtGreen    = round(sqrt(pow(sum_Gx_green, 2) + pow(sum_Gy_green, 2)));
+    
+    
+    // printf("--- %i, %i \n", sum_Gx_green, sum_Gx_green);
+    printf("*** (%i %i %i)\n", edge_pixel.rgbtRed, edge_pixel.rgbtGreen, edge_pixel.rgbtBlue);
 
     if (edge_pixel.rgbtRed   > 255) edge_pixel.rgbtRed = 255;
     if (edge_pixel.rgbtBlue  > 255) edge_pixel.rgbtBlue = 255;
