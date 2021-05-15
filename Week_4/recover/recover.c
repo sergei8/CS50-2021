@@ -2,10 +2,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
- 
+
+typedef unsigned char BYTE;
 int FAT_BLOCK = 512;
-int find_jpg(unsigned char data[FAT_BLOCK]);
-int write_img(char* file_name, int blocks_counter, unsigned char** img);
+
+int check_start_jpg(BYTE buffer[FAT_BLOCK]);
+int ckeck_end_jpg(BYTE buffer[FAT_BLOCK]);
+
 int main(int argc, char *argv[])
 {
     // check params
@@ -23,89 +26,91 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    // read and process input image
-    unsigned char buffer[FAT_BLOCK];
-    int first_jpg = 1;
-    int jpg_found = 0;
-    int blocks_counter;
-    int number_of_imgs = 0;
-    char file_name[4];
-
-    // allocate memory for 1-st block of jpg image
-    unsigned char** img = malloc(FAT_BLOCK);
-
+    BYTE buffer[FAT_BLOCK]; 
+    int is_empty_block = 1;  // empty block marker
+    
     while (fread(buffer, FAT_BLOCK, 1, input) == 1)
     {
-        // find JPG in the buffer
-        if (find_jpg(buffer) == 1)
+
+        // analyse blok type
+        int is_start_jpg   =  check_start_jpg(buffer);
+        int is_end_jpg     =  ckeck_end_jpg(buffer);
+        // printf("%i ", is_end_jpg);
+
+        if( is_start_jpg == 1)
         {
-            // check if first image
-            if (first_jpg == 1) first_jpg = 0;
+            printf("\nS");
+
+            is_empty_block = 0;
+
+            if (is_end_jpg > 0)
+            {
+                is_empty_block = 1;
+
+                // TODO accumulate `img` with rest of block
+                // TODO write output
+                printf("\nE\n");
+                continue;
+            }
             else
             {
-                // count images
-                number_of_imgs++;
-                sprintf(file_name, "%03i", number_of_imgs);
-                // TODO write `old img` to the file
-                if (write_img(file_name, blocks_counter, img) != 0)
-                {
-                    printf("Error writing file %s \n", file_name);
-                    return 3;
-                }
-                // printf("%s\n", file_name);
-            } 
-            
-            // set controls
-            jpg_found = 1;
-            blocks_counter = 0;
-            
-            // decrease memory for new img to one block
-            img = realloc(img, FAT_BLOCK);
-            img[blocks_counter] = buffer;
+                // TODO accumulate `img` with whole block
+                printf("#");
+                continue;
+            }
         }
         else
         {
-            // continue accumulate blocks of img
-            if (jpg_found == 1)
+            if (is_empty_block == 1)
             {
-                blocks_counter++;
-                // increase memory for additional blocks
-                img = realloc(img, blocks_counter * FAT_BLOCK);
-                // store part of image
-                img[blocks_counter] = buffer;
+                printf(".");
+                continue;
+            }
+            else
+            {
+                // TODO accumulate `img` with rest of block 
+                // (start & end in the same block)
+                printf("@");
+                continue;
             }
         }
     }
 
-    free(img);
-    printf("Number of images: %05i\n", number_of_imgs);
+
+
     return 0;
 
 }
 
 /**
- * find jpg header in the bytes sequence
- * return 1 - true/0 - false
+ * @brief check if current block contains jpg header
+ * 
+ * @param buffer - current block
+ * @return int - 1 - yes; 0 - no
  */
- int find_jpg(unsigned char data[FAT_BLOCK])
- {
-    if (data[0] == 0xff && data[1] == 0xd8 && data[2] == 0xff && (data[3] & 0xf0) == 0xe0)
+int check_start_jpg(BYTE buffer[FAT_BLOCK])
+{
+    if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
         return 1;
     else
         return 0;
- }
+}
 
-int write_img(char* file_name, int blocks_counter, unsigned char** img)
+/**
+ * @brief check if current block contains jpg trailer
+ * 
+ * @param buffer - current block
+ * @return int 0 - not contain; >0 - bytes to end of jpg
+ */
+int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
 {
-    char name[8];
-    sprintf(name, "%s.jpg", file_name);
-    printf("%s %i\n", name, blocks_counter);
-    FILE *output = fopen(name, "w");
-    for (int i = 0; i < blocks_counter; i++)
-        fwrite(img[i], FAT_BLOCK, 1, output);
-        exit(0);
-    fclose(output);
-    
+    for (int i = 0; i < FAT_BLOCK - 1; i++)
+    {
+        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9)
+            {
+                // printf("E\n");
+                return i+1;
+            }
+    }
     return 0;
-
 }
