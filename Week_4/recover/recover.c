@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     while (fread(buffer, FAT_BLOCK, 1, input) == 1)
     {
-                        print_buffer(buffer, FAT_BLOCK);
+        print_buffer(buffer, FAT_BLOCK);
 
         // analyse blok type
         int is_start_jpg   =  check_start_jpg(buffer);
