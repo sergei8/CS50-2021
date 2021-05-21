@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     BYTE buffer[FAT_BLOCK]; 
     BYTE* img;
     int is_empty_block;  // empty block marker
-    int blocks_counter;
+    // int blocks_counter;
     int img_counter = 0;
     char file_name[4];
  
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         {
             printf("start = %i; end = %i\n", is_start_jpg, is_end_jpg);
             is_empty_block = 0;
-            blocks_counter = 1;
+            // blocks_counter = 1;
 
             img = malloc(FAT_BLOCK * sizeof(BYTE));
             img_len = FAT_BLOCK * sizeof(BYTE);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
             {
                 is_empty_block = 1;
                 // TODO delete `block_counters`
-                blocks_counter++;
+                // blocks_counter++;
                 img_len_old = img_len;
 
                 // increase memory for additional blocks
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
                     return 3;
                 }
                 printf("End ");
-                printf("*** %i %i\n", blocks_counter, img_counter);
+                // printf("*** %i %i\n", blocks_counter, img_counter);
                 img_counter++;
                 free(img);
                 continue;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
             if (is_empty_block == 0)
             {
                 // accumulate `img` with rest of block 
-                blocks_counter++;
+                // blocks_counter++;
                 img_len_old = img_len;
                 img_len += FAT_BLOCK * sizeof(BYTE);
                
