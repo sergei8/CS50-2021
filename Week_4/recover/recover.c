@@ -40,8 +40,10 @@ int main(int argc, char *argv[])
 
     while (!feof(input)) 
     {
+        // clear buffer and read new block
+        memset (buffer, 0, FAT_BLOCK);
         fread(buffer, FAT_BLOCK, 1, input);
-        
+
         // analyse blok type
         int is_start_jpg   =  check_start_jpg(buffer);
         int is_end_jpg     =  ckeck_end_jpg(buffer);
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
 
             img = malloc(FAT_BLOCK * sizeof(BYTE));
             img_len = FAT_BLOCK * sizeof(BYTE);
-            printf ("len = %i\n", img_len);
+            // printf ("len = %i\n", img_len);
 
             // accumulate `img` with whole block
             for(int i = 0; i < img_len; i++) img[i] = buffer[i];
@@ -73,6 +75,8 @@ int main(int argc, char *argv[])
 
                 // increase memory for additional blocks
                 img_len += is_end_jpg * sizeof(BYTE);
+                printf ("len = %i\n", img_len);
+
                 img = realloc(img, img_len);
                 
                 // store part of image
@@ -87,7 +91,7 @@ int main(int argc, char *argv[])
                     printf("\nError writing file %s \n", file_name);
                     return 3;
                 }
-                printf("End\n");
+                printf("End ");
                 printf("*** %i %i\n", blocks_counter, img_counter);
                 img_counter++;
                 free(img);
@@ -96,8 +100,6 @@ int main(int argc, char *argv[])
 
             if (is_empty_block == 0)
             {
-                
-                printf("empty\n");
                 // accumulate `img` with rest of block 
                 blocks_counter++;
                 img_len_old = img_len;
@@ -105,16 +107,14 @@ int main(int argc, char *argv[])
                
                 // increase memory for additional blocks
                 img = realloc(img, img_len);
-                // store part of image
                 for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
 
                 continue;
             }
-            else 
-                continue;
+            // else continue;
         }
     }
-    
+    printf("\nEND OF APP\n");
     fclose(input);
     return 0;
 }
@@ -156,7 +156,7 @@ int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
  * @brief write `img` array into file with unique name
  * 
  * @param file_name 
- * @param blocks_counter 
+ * @param len 
  * @param img 
  * @return int =  
  */
@@ -166,10 +166,10 @@ int write_img(char* file_name, int len, BYTE* img)
     char name[8];
     sprintf(name, "%s.jpg", file_name);
     FILE *output = fopen(name, "w");
-    fwrite(img, len, 1, output);
+    
+    if (fwrite(img, len, 1, output) != 1) return 1;
     
     fclose(output);
-
     return 0;
     
 }
