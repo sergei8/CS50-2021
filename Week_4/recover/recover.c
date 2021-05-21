@@ -35,8 +35,6 @@ int main(int argc, char *argv[])
     int img_counter = 0;
     char file_name[4];
  
-    // allocate memory for 1-st block of jpg image
-
     while (!feof(input)) 
     {
         // clear buffer and read new block
@@ -102,6 +100,7 @@ int main(int argc, char *argv[])
             }
         }
     }
+    
     fclose(input);
     return 0;
 }
@@ -148,7 +147,6 @@ int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
  */
 int write_img(char* file_name, int len, BYTE* img)
 {
-    
     char name[8];
     sprintf(name, "%s.jpg", file_name);
     FILE *output = fopen(name, "w");
@@ -157,5 +155,4 @@ int write_img(char* file_name, int len, BYTE* img)
     
     fclose(output);
     return 0;
-    
 }
