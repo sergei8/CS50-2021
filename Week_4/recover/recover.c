@@ -11,7 +11,6 @@ int img_len, img_len_old;
 int check_start_jpg(BYTE buffer[FAT_BLOCK]);
 int ckeck_end_jpg(BYTE buffer[FAT_BLOCK]);
 int write_img(char* file_name, int len, BYTE* img);
-// void print_buffer(BYTE buffer[FAT_BLOCK], int n);
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +31,7 @@ int main(int argc, char *argv[])
 
     BYTE buffer[FAT_BLOCK]; 
     BYTE* img;
-    int is_empty_block = 1;  // empty block marker
+    int is_empty_block;  // empty block marker
     int blocks_counter;
     int img_counter = 0;
     char file_name[4];
@@ -42,22 +41,21 @@ int main(int argc, char *argv[])
     while (!feof(input)) 
     {
         fread(buffer, FAT_BLOCK, 1, input);
-        // print_buffer(buffer, FAT_BLOCK);
         
         // analyse blok type
         int is_start_jpg   =  check_start_jpg(buffer);
         int is_end_jpg     =  ckeck_end_jpg(buffer);
 
-        printf("start = %i; end = %i\n", is_start_jpg, is_end_jpg);
 
         if( is_start_jpg == 1)
         {
+            printf("start = %i; end = %i\n", is_start_jpg, is_end_jpg);
             is_empty_block = 0;
             blocks_counter = 1;
 
             img = malloc(FAT_BLOCK * sizeof(BYTE));
             img_len = FAT_BLOCK * sizeof(BYTE);
-            // img_len = blocks_counter * FAT_BLOCK * sizeof(BYTE);
+            printf ("len = %i\n", img_len);
 
             // accumulate `img` with whole block
             for(int i = 0; i < img_len; i++) img[i] = buffer[i];
@@ -90,31 +88,33 @@ int main(int argc, char *argv[])
                     return 3;
                 }
                 printf("End\n");
-                printf("%i %i\n", blocks_counter, img_counter);
+                printf("*** %i %i\n", blocks_counter, img_counter);
                 img_counter++;
+                is_empty_block = 1;
                 free(img);
                 continue;
             }
 
             if (is_empty_block == 0)
             {
+                
+                printf("empty\n");
                 // accumulate `img` with rest of block 
                 blocks_counter++;
                 img_len_old = img_len;
                 img_len += FAT_BLOCK * sizeof(BYTE);
-                // img_len = blocks_counter * FAT_BLOCK * sizeof(BYTE);
                
                 // increase memory for additional blocks
                 img = realloc(img, img_len);
                 // store part of image
                 for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
 
-                // printf(".\n");
                 continue;
             }
         }
     }
     
+    fclose(input);
     return 0;
 }
 
@@ -144,7 +144,7 @@ int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
     {
         if (buffer[i] == 0xFF && buffer[i+1] == 0xD9)
             {
-                printf("%i \n", i+2);
+                printf("i = %i \n", i+2);
                 return i+2;
             }
     }
