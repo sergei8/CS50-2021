@@ -67,12 +67,12 @@ int main(int argc, char *argv[])
             if (is_end_jpg > 0)
             {
                 is_empty_block = 1;
+                // TODO delete `block_counters`
                 blocks_counter++;
                 img_len_old = img_len;
 
                 // increase memory for additional blocks
                 img_len += is_end_jpg * sizeof(BYTE);
-                // img_len += FAT_BLOCK * sizeof(BYTE);
                 img = realloc(img, img_len);
                 
                 // store part of image
@@ -90,7 +90,6 @@ int main(int argc, char *argv[])
                 printf("End\n");
                 printf("*** %i %i\n", blocks_counter, img_counter);
                 img_counter++;
-                is_empty_block = 1;
                 free(img);
                 continue;
             }
@@ -111,6 +110,8 @@ int main(int argc, char *argv[])
 
                 continue;
             }
+            else 
+                continue;
         }
     }
     
