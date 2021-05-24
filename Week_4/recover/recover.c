@@ -33,24 +33,22 @@ int main(int argc, char *argv[])
     BYTE* img;
     int is_empty_block;  // empty block marker
     int img_counter = 0;
-    char file_name[4];
+    char file_name[8];
  
-    while (!feof(input)) 
+    while (1) 
     {
-        // clear buffer and read new block
-        memset (buffer, 0, FAT_BLOCK);
-        fread(buffer, FAT_BLOCK, 1, input);
+        int n = fread(&buffer, FAT_BLOCK, 1, input);
+        if (n != 1) return 0;
 
         // analyse blok type
         int is_start_jpg   =  check_start_jpg(buffer);
         int is_end_jpg     =  ckeck_end_jpg(buffer);
 
-
         if( is_start_jpg == 1)
         {
             is_empty_block = 0;
 
-            img = malloc(FAT_BLOCK * sizeof(BYTE));
+            img = (BYTE*) realloc(NULL, FAT_BLOCK * sizeof(BYTE));
 
             // accumulate `img` with whole block
             img_len = FAT_BLOCK * sizeof(BYTE);
@@ -67,7 +65,7 @@ int main(int argc, char *argv[])
 
                 // increase memory for additional blocks
                 img_len += is_end_jpg * sizeof(BYTE);
-                img = realloc(img, img_len);
+                img = (BYTE*) realloc(img, img_len);
                 
                 // store part of image
                 for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
@@ -93,7 +91,7 @@ int main(int argc, char *argv[])
                 img_len += FAT_BLOCK * sizeof(BYTE);
                
                 // increase memory for additional blocks
-                img = realloc(img, img_len);
+                img = (BYTE*) realloc(img, img_len);
                 for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
 
                 continue;
@@ -128,12 +126,8 @@ int check_start_jpg(BYTE buffer[FAT_BLOCK])
 int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
 {
     for (int i = 0; i < FAT_BLOCK - 1; i++)
-    {
-        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9)
-            {
-                return i + 2;
-            }
-    }
+        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9) return (i + 2);
+    
     return 0;
 }
 
@@ -149,10 +143,16 @@ int write_img(char* file_name, int len, BYTE* img)
 {
     char name[8];
     sprintf(name, "%s.jpg", file_name);
+    
     FILE *output = fopen(name, "w");
-    
-    if (fwrite(img, len, 1, output) != 1) return 1;
-    
+    if (output == NULL)  return 1;
+
+    if (fwrite(img, len, 1, output) != 1) 
+    { 
+        fclose(output);
+        return 1;
+    }
+
     fclose(output);
     return 0;
 }
