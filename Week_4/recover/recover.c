@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     BYTE buffer[FAT_BLOCK]; 
     BYTE* img;
     int is_empty_block;  // empty block marker
+    // int blocks_counter;
     int img_counter = 0;
     char file_name[8];
  
@@ -46,12 +47,15 @@ int main(int argc, char *argv[])
 
         if( is_start_jpg == 1)
         {
+            printf("start = %i; end = %i\n", is_start_jpg, is_end_jpg);
             is_empty_block = 0;
+            // blocks_counter = 1;
 
-            img = (BYTE*) realloc(NULL, FAT_BLOCK * sizeof(BYTE));
+            img = malloc(FAT_BLOCK * sizeof(BYTE));
+            img_len = FAT_BLOCK * sizeof(BYTE);
+            // printf ("len = %i\n", img_len);
 
             // accumulate `img` with whole block
-            img_len = FAT_BLOCK * sizeof(BYTE);
             for(int i = 0; i < img_len; i++) img[i] = buffer[i];
 
            continue;
@@ -61,11 +65,15 @@ int main(int argc, char *argv[])
             if (is_end_jpg > 0)
             {
                 is_empty_block = 1;
+                // TODO delete `block_counters`
+                // blocks_counter++;
                 img_len_old = img_len;
 
                 // increase memory for additional blocks
                 img_len += is_end_jpg * sizeof(BYTE);
-                img = (BYTE*) realloc(img, img_len);
+                printf ("len = %i\n", img_len);
+
+                img = realloc(img, img_len);
                 
                 // store part of image
                 for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
@@ -79,6 +87,8 @@ int main(int argc, char *argv[])
                     printf("\nError writing file %s \n", file_name);
                     return 3;
                 }
+                printf("End ");
+                // printf("*** %i %i\n", blocks_counter, img_counter);
                 img_counter++;
                 free(img);
                 continue;
@@ -87,6 +97,7 @@ int main(int argc, char *argv[])
             if (is_empty_block == 0)
             {
                 // accumulate `img` with rest of block 
+                // blocks_counter++;
                 img_len_old = img_len;
                 img_len += FAT_BLOCK * sizeof(BYTE);
                
@@ -96,9 +107,10 @@ int main(int argc, char *argv[])
 
                 continue;
             }
+            // else continue;
         }
     }
-    
+    printf("\nEND OF APP\n");
     fclose(input);
     return 0;
 }
@@ -126,8 +138,13 @@ int check_start_jpg(BYTE buffer[FAT_BLOCK])
 int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
 {
     for (int i = 0; i < FAT_BLOCK - 1; i++)
-        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9) return (i + 2);
-    
+    {
+        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9)
+            {
+                // printf("i = %i \n", i+2);
+                return i+2;
+            }
+    }
     return 0;
 }
 
@@ -137,7 +154,7 @@ int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
  * @param file_name 
  * @param len 
  * @param img 
- * @return int =  1 - error, 0 - success
+ * @return int =  
  */
 int write_img(char* file_name, int len, BYTE* img)
 {
