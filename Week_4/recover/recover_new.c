@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
         if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
         {
             sprintf(file_name, "%03i.jpg", img_counter++);
-            // printf("start\n");
+            printf("start\n");
 
             FILE *output = fopen(file_name, "a");
             if (output == NULL)  
@@ -48,17 +48,21 @@ int main(int argc, char *argv[])
             write_img(buffer, output, file_name);
 
            // TODO!
-            while (fread(&buffer, FAT_BLOCK, 1, input) == 1 && end_jpg(buffer) > 0 ) 
+            while (fread(&buffer, FAT_BLOCK, 1, input) == 1 ) 
             {
+                if (end_jpg(buffer) == 0)
+                {
                     write_img(buffer, output, file_name);
-                    // printf("next\n");
+                    printf("next\n");
+                }
+                else
+                {
+                    write_img(buffer, output, file_name);
+                    printf("end\n");
+                    fclose(output);
+                    break;
+                }
             }
-            
-            write_img(buffer, output, file_name);
-            // printf("end\n");
-            fclose(output);
-
-            // break;
         }
     }
     return 0;
