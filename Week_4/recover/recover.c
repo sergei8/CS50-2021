@@ -6,11 +6,9 @@
 
 typedef unsigned char BYTE;
 int FAT_BLOCK = 512;
-int img_len, img_len_old;
 
-int check_start_jpg(BYTE buffer[FAT_BLOCK]);
-int ckeck_end_jpg(BYTE buffer[FAT_BLOCK]);
-int write_img(char* file_name, int len, BYTE* img);
+int end_jpg(BYTE buffer[FAT_BLOCK]);
+void write_img(BYTE *buffer, FILE *output, char* file_name);
 
 int main(int argc, char *argv[])
 {
@@ -30,90 +28,42 @@ int main(int argc, char *argv[])
     }
 
     BYTE buffer[FAT_BLOCK]; 
-    BYTE *img;
-    int is_empty_block;  // empty block marker
     int img_counter = 0;
     char file_name[8];
- 
+    
+    // main reading cycle
     while (fread(&buffer, FAT_BLOCK, 1, input) == 1) 
     {
-        // analyse blok type
-        int is_start_jpg   =  check_start_jpg(buffer);
-        int is_end_jpg     =  ckeck_end_jpg(buffer);
-
-        if( is_start_jpg == 1)
+        if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
         {
-            printf("start = %i; end = %i\n", is_start_jpg, is_end_jpg);
-            is_empty_block = 0;
+            sprintf(file_name, "%03i.jpg", img_counter++);
 
-            img = malloc(FAT_BLOCK * sizeof(BYTE));
-            img_len = FAT_BLOCK * sizeof(BYTE);
-
-            // accumulate `img` with whole block
-            for(int i = 0; i < img_len; i++) img[i] = buffer[i];
-
-           continue;
-        }
-        else
-        {
-            if (is_end_jpg > 0)
-            {
-                is_empty_block = 1;
-                img_len_old = img_len;
-
-                // increase memory for additional blocks
-                img_len += is_end_jpg * sizeof(BYTE);
-
-                img = realloc(img, img_len);
-                
-                // store part of image
-                for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
-
-                // set output file name
-                sprintf(file_name, "%03i", img_counter);
-
-                // write output
-                if (write_img(file_name, img_len, img) != 0)
-                {
-                    return 3;
-                }
-                img_counter++;
-                free(img);
-                continue;
+            FILE *output = fopen(file_name, "a");
+            if (output == NULL)  
+            {    
+                printf ("Error open output file %s ", file_name);
+                return 3;
             }
+            
+            write_img(buffer, output, file_name);
 
-            if (is_empty_block == 0)
+            // reading cycle for rest blocks of image
+            while (fread(&buffer, FAT_BLOCK, 1, input) == 1 ) 
             {
-                // accumulate `img` with rest of block 
-                img_len_old = img_len;
-                img_len += FAT_BLOCK * sizeof(BYTE);
-               
-                // increase memory for additional blocks
-                img = (BYTE*) realloc(img, img_len);
-                for(int i = img_len_old, j = 0; i < img_len; i++, j++) img[i] = buffer[j];
-
-                continue;
+                if (end_jpg(buffer) == 0)
+                    write_img(buffer, output, file_name);
+                else
+                {
+                    write_img(buffer, output, file_name);
+                    fclose(output);
+                    break;
+                }
             }
         }
     }
-    // printf("\nEND OF APP\n");
-    fclose(input);
     return 0;
 }
 
-/**
- * @brief check if current block contains jpg header
- * 
- * @param buffer - current block
- * @return int - 1 - yes; 0 - no
- */
-int check_start_jpg(BYTE buffer[FAT_BLOCK])
-{
-    if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
-        return 1;
-    else
-        return 0;
-}
 
 /**
  * @brief check if current block contains jpg trailer
@@ -121,40 +71,28 @@ int check_start_jpg(BYTE buffer[FAT_BLOCK])
  * @param buffer - current block
  * @return int 0 - not contain; >0 - bytes to end of jpg
  */
-int ckeck_end_jpg(BYTE buffer[FAT_BLOCK])
+int end_jpg(BYTE buffer[FAT_BLOCK])
 {
+    // find end of jpg trailers
     for (int i = 0; i < FAT_BLOCK - 1; i++)
-    {
-        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9)
-            {
-                return i+2;
-            }
-    }
+        if (buffer[i] == 0xFF && buffer[i+1] == 0xD9) return 1;
+    
     return 0;
 }
 
 /**
- * @brief write `img` array into file with unique name
+ * @brief append block of image to output file
  * 
- * @param file_name 
- * @param len 
- * @param img 
- * @return int =  
+ * @param buffer - what to append
+ * @param output - file to append
+ * @param file_name - output file name
  */
-int write_img(char* file_name, int len, BYTE* img)
-{
-    char name[8];
-    sprintf(name, "%s.jpg", file_name);
-    
-    FILE *output = fopen(name, "w");
-    if (output == NULL)  return 1;
-
-    if (fwrite(img, len, 1, output) != 1) 
+void write_img(BYTE *buffer, FILE *output, char* file_name)
+{    
+    if (fwrite(buffer, FAT_BLOCK, 1, output) != 1) 
     { 
+        printf ("Error write output file %s ", file_name);
         fclose(output);
-        return 1;
+        exit (1);
     }
-
-    fclose(output);
-    return 0;
 }
