@@ -4,7 +4,7 @@ typedef struct person {
     struct person *parents[2];
 } person;
 person *create_family(int generations);
-const int GENERATIONS = 3;
+const int GENERATIONS = 2;
 int main() {
     person *p = create_family(GENERATIONS);
   return 0;
