@@ -1,6 +1,8 @@
 // Implements a dictionary's functionality
 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "dictionary.h"
 
@@ -17,6 +19,8 @@ const unsigned int N = 1;
 
 // Hash table
 node *table[N];
+
+int words_count = 0;
 
 // Returns true if word is in dictionary, else false
 bool check(const char *word)
@@ -35,15 +39,29 @@ unsigned int hash(const char *word)
 // Loads dictionary into memory, returning true if successful, else false
 bool load(const char *dictionary)
 {
-    // TODO
-    return false;
+    char *line_buf = NULL;
+    ssize_t line_size;
+    size_t line_buf_size = LENGTH;
+
+    FILE *fp = fopen(dictionary, "r");
+    if (fp == NULL) return false;
+
+    // read dictionary line by line
+    line_size = getline(&line_buf, &line_buf_size, fp);
+    while (line_size >= 0)
+    {
+        // printf("size = %zi, %s", line_size, line_buf);
+        words_count++;
+        line_size = getline(&line_buf, &line_buf_size, fp);
+    }
+    printf("words_count = %i\n", words_count);
+    return true;
 }
 
 // Returns number of words in dictionary if loaded, else 0 if not yet loaded
 unsigned int size(void)
 {
-    // TODO
-    return 0;
+    return words_count;
 }
 
 // Unloads dictionary from memory, returning true if successful, else false
