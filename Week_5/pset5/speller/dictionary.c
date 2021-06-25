@@ -34,7 +34,35 @@ size_t line_buf_size = LENGTH;
 // Returns true if word is in dictionary, else false
 bool check(const char *word)
 {
-    // TODO
+    // make normalized hash of the `word`
+    unsigned int n_hash = hash(word);
+
+    // check if `word` in the backet
+    if (strcmp(word, table[n_hash].word) == 0)
+    {
+        return true;
+    }
+
+    // empty backet - `word` is not in the dictionary?
+    if (table[n_hash].word[0] == '\0')
+    {
+        return false;
+    }
+
+    // if `NOT` - scan chain and look for `word`
+    node *p = table[n_hash].next;
+    while(p->next != NULL)
+    {
+        if (strcmp(p->word, word))
+        {
+            return true;
+        }
+        else
+        {
+            p = p->next;
+        }
+    }
+
     return false;
 }
 
@@ -90,7 +118,7 @@ bool load(const char *dictionary)
     fp = fopen(current_dict, "r");
     if (fp == NULL) return false;
 
-    // cycle by all words, calculate hash and caunt collisions
+    // cycle by all words, calculate hash and resolve collisions
     line_size = getline(&cur_word, &buf_size, fp);
     while(line_size >= 0)
     {
@@ -147,6 +175,7 @@ unsigned int size(void)
 // Unloads dictionary from memory, returning true if successful, else false
 bool unload(void)
 {
-    // TODO
-    return false;
+    free(table);
+
+    return true;
 }
