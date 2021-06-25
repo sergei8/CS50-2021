@@ -1,5 +1,7 @@
 // Implements a dictionary's functionality
 
+#define  _GNU_SOURCE
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,27 +20,26 @@ node;
 // Number of buckets in hash table
 const unsigned int N = 1;
 
-// Hash table
-// node *table[N];
 node *table;
 
 int words_count = 0;
 int table_size;
-int col_count = 0; 
+int col_count = 0;
 unsigned long buf_size = 100;
 char* current_dict;
 char *line_buf, *cur_word;
-ssize_t line_size;
+size_t line_size;
 size_t line_buf_size = LENGTH;
 
 // Returns true if word is in dictionary, else false
 bool check(const char *word)
 {
+
     // make normalized hash of the `word`
     unsigned int n_hash = hash(word);
 
     // check if `word` in the backet
-    if (strcmp(word, table[n_hash].word) == 0)
+    if (strcasecmp(word, table[n_hash].word) == 0)
     {
         return true;
     }
@@ -49,11 +50,11 @@ bool check(const char *word)
         return false;
     }
 
-    // if `NOT` - scan chain and look for `word`
+    // TODO if `NOT` - scan chain and look for `word`
     node *p = table[n_hash].next;
     while(p->next != NULL)
     {
-        if (strcmp(p->word, word))
+        if (strcasecmp(p->word, word) == 0)
         {
             return true;
         }
@@ -85,42 +86,43 @@ unsigned int hash(const char *word)
 // Loads dictionary into memory, returning true if successful, else false
 bool load(const char *dictionary)
 {
+
+
     FILE *fp = fopen(dictionary, "r");
     if (fp == NULL) return false;
 
-    // read dictionary line by line
-    line_size = getline(&line_buf, &line_buf_size, fp);
-    while (line_size >= 0)
-    {
+    // count the length of the file
+    while (!feof(fp)){
+        getline(&cur_word, &buf_size, fp);
         words_count++;
-        line_size = getline(&line_buf, &line_buf_size, fp);
     }
-    // printf("words_count = %i\n", words_count);
-    
-    fclose(fp);
+    // set pointer to start of the file
+    rewind(fp);
+
+    printf("words_count = %i\n", words_count);
 
     // alloc memory for hash table
     table_size = words_count - 1;
     table = (node*)malloc(table_size * sizeof(node));
     if (table == NULL)
     {
-        printf("error alloc %i ", table_size);
+        printf("error alloc %lu \n", sizeof(table));
         return false;
     }
 
+
+    // fill in backets wiyh `empty`
     for (int i = 0; i < table_size; i++)
     {
-        strcpy(table[i].word, "\0"); 
+        strcpy(table[i].word, "\0");
         table[i].next = NULL;
     }
+    printf("table size: %i \n", table_size);
 
-    // open dictionary again
-    fp = fopen(current_dict, "r");
-    if (fp == NULL) return false;
 
     // cycle by all words, calculate hash and resolve collisions
     line_size = getline(&cur_word, &buf_size, fp);
-    while(line_size >= 0)
+    while(line_size != -1)
     {
         // do not add words with big length
         if (strlen(cur_word) >= LENGTH)
@@ -129,7 +131,7 @@ bool load(const char *dictionary)
             continue;
         }
 
-        // make normalized hash from the `word`    
+        // make normalized hash from the `word`
         unsigned int n_hash = hash(cur_word);
 
         // check for collision by checking first byte of `word` for "\0"
@@ -140,14 +142,14 @@ bool load(const char *dictionary)
         }
         else
         {
-            // collision detected - create chain node
+            // collision detected - create chained node
             col_count++;
             node* p = malloc(sizeof(node));
-            
+
             // check if backet has chain of nodes
             if (table[n_hash].next == NULL)
             {
-                // no chain - add first node 
+                // no chain - add first node
                 table[n_hash].next = p;
             }
             else
@@ -163,6 +165,9 @@ bool load(const char *dictionary)
 
     fclose(fp);
 
+    printf("backets: %i\ncollisions: %i\n", table_size, col_count);
+
+    printf("DICTIONARY LOADED\n");
     return true;
 }
 
@@ -175,7 +180,9 @@ unsigned int size(void)
 // Unloads dictionary from memory, returning true if successful, else false
 bool unload(void)
 {
+    printf("TRY DICTIONARY UNLOAD\n");
     free(table);
+    printf("DICTIONARY UNLOADED\n");
 
     return true;
 }
