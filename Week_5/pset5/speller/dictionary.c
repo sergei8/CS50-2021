@@ -37,21 +37,25 @@ bool check(const char *word)
 
     // make normalized hash of the `word`
     unsigned int n_hash = hash(word);
+    // printf("word: %s, hash: %i, dict: %s\n", word, n_hash, table[n_hash].word);
 
     // check if `word` in the backet
     if (strcasecmp(word, table[n_hash].word) == 0)
     {
+        printf("FOUND - word: %s, hash: %i, dict: %s\n", word, n_hash, table[n_hash].word);
         return true;
     }
 
     // empty backet - `word` is not in the dictionary?
     if (table[n_hash].word[0] == '\0')
     {
+        printf("EMPTY %s  -  %s\n", table[n_hash].word, word);
+        printf("word hash = %i, dict hash = %i\n", n_hash, hash("cat"));
         return false;
     }
 
-    // TODO if `NOT` - scan chain and look for `word`
-    node *p = table[n_hash].next;
+    // if `NOT` - scan chain and look for `word`
+    node *p = &table[n_hash];
     while(p->next != NULL)
     {
         if (strcasecmp(p->word, word) == 0)
@@ -111,7 +115,7 @@ bool load(const char *dictionary)
     }
 
 
-    // fill in backets wiyh `empty`
+    // fill in backets with `empty`
     for (int i = 0; i < table_size; i++)
     {
         strcpy(table[i].word, "\0");
@@ -145,12 +149,15 @@ bool load(const char *dictionary)
             // collision detected - create chained node
             col_count++;
             node* p = malloc(sizeof(node));
+            strcpy(p->word, cur_word);
+
 
             // check if backet has chain of nodes
             if (table[n_hash].next == NULL)
             {
                 // no chain - add first node
                 table[n_hash].next = p;
+                p->next = NULL;
             }
             else
             {
@@ -165,9 +172,9 @@ bool load(const char *dictionary)
 
     fclose(fp);
 
-    printf("backets: %i\ncollisions: %i\n", table_size, col_count);
+    printf("backets: %i,  collisions: %i\n", table_size, col_count);
 
-    printf("DICTIONARY LOADED\n");
+    // printf("DICTIONARY LOADED\n");
     return true;
 }
 
@@ -180,9 +187,9 @@ unsigned int size(void)
 // Unloads dictionary from memory, returning true if successful, else false
 bool unload(void)
 {
-    printf("TRY DICTIONARY UNLOAD\n");
+    // printf("TRY DICTIONARY UNLOAD\n");
     free(table);
-    printf("DICTIONARY UNLOADED\n");
+    // printf("DICTIONARY UNLOADED\n");
 
     return true;
 }

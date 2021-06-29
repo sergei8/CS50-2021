@@ -12,5 +12,11 @@ int main() {
     p->number = 200; p->next = NULL; list->next = p; p = NULL;
     p = malloc(sizeof(node));
     p->number = 300; p->next = NULL; list->next->next = p; p = NULL;
+    p = &list[0];
+    while(p->next != NULL){            
+      p = p->next;
+    }
+
+    free(list);
     return 0;
 }
