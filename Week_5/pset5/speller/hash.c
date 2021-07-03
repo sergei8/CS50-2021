@@ -17,6 +17,8 @@ typedef struct node
 }
 node;
 
+void free_chain(node *list);
+
 node* table;
 
 int main(void)
@@ -62,6 +64,8 @@ int main(void)
             continue;
         }
         
+        word[strlen(word) - 1] = '\0';
+
         // make hash from the `word`    
         unsigned long hash_str = hash((unsigned char*) word);
 
@@ -79,6 +83,8 @@ int main(void)
             // collision detected - create chain node
             col_count++;
             node* p = malloc(sizeof(node));
+            strcpy(p->word, word);
+            p->next = NULL; 
             
             // check if backet has chain of nodes
             if (table[n_hash].next == NULL)
@@ -93,13 +99,24 @@ int main(void)
                 table[n_hash].next = p;
             }
         }
-
-        line_size = getline(&word, &buf_size, fp);
+            line_size = getline(&word, &buf_size, fp);
     }
 
+    // cycle of free table and chain nodes
+    int free_count = 0;
+    for(int i = 0; i < words_count; i++)
+    {
+        if (table[i].next != NULL)
+        {
+            // call free chain
+            free_chain(table[i].next);
+            free_count++;
+        }
+    }
+    
     free(table);
 
-    printf("\ntable_size = %i\ncol_count = %i\n", table_size, col_count);
+    printf("\ntable_size = %i\ncol_count = %i\nfreesed = %i\n", table_size, col_count, free_count);
 
 }
 
@@ -114,3 +131,13 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
+void free_chain(node *list)
+{
+    struct node *tmp;
+    while(list != NULL)
+    {
+        tmp = list;
+        list = list->next;
+        free(tmp);
+    }
+}

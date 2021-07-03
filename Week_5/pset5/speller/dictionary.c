@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "dictionary.h"
 
@@ -35,22 +36,32 @@ size_t line_buf_size = LENGTH;
 bool check(const char *word)
 {
 
-    // make normalized hash of the `word`
-    unsigned int n_hash = hash(word);
-    // printf("word: %s, hash: %i, dict: %s\n", word, n_hash, table[n_hash].word);
+    // lowercase `word`
+    char lower_word[LENGTH - 1];
+    strcpy(lower_word, word);
 
-    // check if `word` in the backet
-    if (strcasecmp(word, table[n_hash].word) == 0)
+    for (int i = 0; lower_word[i]; i++)
     {
-        printf("FOUND - word: %s, hash: %i, dict: %s\n", word, n_hash, table[n_hash].word);
+        lower_word[i] = tolower(lower_word[i]);
+    }
+
+    // printf("LOWER:  %s - %s\n", word, lower_word);
+
+    // make normalized hash of the `word`
+    unsigned int n_hash = hash(lower_word);
+    // printf("word: %s, hash: %i, dict: %s\n", lower_word, n_hash, table[n_hash].word);
+
+    // check if `lower_word` in the backet
+    if (strcmp(lower_word, table[n_hash].word) == 0)
+    {
+        // printf("FOUND - word: %s, hash: %i, dict: %s\n", lower_word, n_hash, table[n_hash].word);
         return true;
     }
 
     // empty backet - `word` is not in the dictionary?
     if (table[n_hash].word[0] == '\0')
     {
-        printf("EMPTY %s  -  %s\n", table[n_hash].word, word);
-        printf("word hash = %i, dict hash = %i\n", n_hash, hash("cat"));
+        // printf("EMPTY %s  -  %s\n", table[n_hash].word, word);
         return false;
     }
 
@@ -58,8 +69,9 @@ bool check(const char *word)
     node *p = &table[n_hash];
     while(p->next != NULL)
     {
-        if (strcasecmp(p->word, word) == 0)
+        if (strcasecmp(p->word, lower_word) == 0)
         {
+            // printf("FOUND IN CHAIN: %s", word);
             return true;
         }
         else
@@ -91,7 +103,6 @@ unsigned int hash(const char *word)
 bool load(const char *dictionary)
 {
 
-
     FILE *fp = fopen(dictionary, "r");
     if (fp == NULL) return false;
 
@@ -103,8 +114,6 @@ bool load(const char *dictionary)
     // set pointer to start of the file
     rewind(fp);
 
-    printf("words_count = %i\n", words_count);
-
     // alloc memory for hash table
     table_size = words_count - 1;
     table = (node*)malloc(table_size * sizeof(node));
@@ -114,29 +123,35 @@ bool load(const char *dictionary)
         return false;
     }
 
-
     // fill in backets with `empty`
     for (int i = 0; i < table_size; i++)
     {
         strcpy(table[i].word, "\0");
         table[i].next = NULL;
     }
-    printf("table size: %i \n", table_size);
+    // printf("table size: %i \n", table_size);
 
 
     // cycle by all words, calculate hash and resolve collisions
-    line_size = getline(&cur_word, &buf_size, fp);
-    while(line_size != -1)
+
+    fgets(cur_word, 100, fp);
+
+    while(!feof(fp))
     {
+
+        cur_word[strlen(cur_word) - 1] = '\0';
+
+        // printf("DICT WORD %s LEN = %lu\n", cur_word, strlen(cur_word));
+
         // do not add words with big length
-        if (strlen(cur_word) >= LENGTH)
+        if (strlen(cur_word) > LENGTH)
         {
-            line_size = getline(&cur_word, &buf_size, fp);
             continue;
         }
 
         // make normalized hash from the `word`
         unsigned int n_hash = hash(cur_word);
+        // printf("DICT word: %s, hash: %i\n", cur_word, n_hash);
 
         // check for collision by checking first byte of `word` for "\0"
         if (table[n_hash].word[0] == '\0')
@@ -167,21 +182,22 @@ bool load(const char *dictionary)
             }
         }
 
-        line_size = getline(&cur_word, &buf_size, fp);
+        // line_size = getline(&cur_word, &buf_size, fp);
+        fgets(cur_word, 100, fp);
+
     }
 
     fclose(fp);
 
-    printf("backets: %i,  collisions: %i\n", table_size, col_count);
+    // printf("backets: %i,  collisions: %i\n", table_size, col_count);
 
-    // printf("DICTIONARY LOADED\n");
     return true;
 }
 
 // Returns number of words in dictionary if loaded, else 0 if not yet loaded
 unsigned int size(void)
 {
-    return words_count;
+    return words_count - 1;
 }
 
 // Unloads dictionary from memory, returning true if successful, else false
