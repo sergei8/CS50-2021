@@ -1,0 +1,115 @@
+    /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+    .row.content {height: 800px}
+        
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+    
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height: auto;} 
+    }
+
+    .img-profile {
+      max-width: 10rem;
+      max-height: 10rem;
+      border: .5rem solid rgba(255, 255, 255, 0.2);
+    }
+
+    .img-fluid {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    .rounded-circle {
+      border-radius: 50% !important;
+    }
+    
+    #left-panel {
+      display: flex;
+      text-align: center;
+      background-color: #bd5d38 !important;
+    }
+
+    #left-content{
+      margin: auto;
+    }
+
+    #menu{
+      text-align: left;
+      list-style: none;
+      font-weight: 800;
+      letter-spacing: .05rem;
+      line-height: 2.1em;
+      padding-left: 1em;
+      margin-top: 2em;
+    }
+
+    .menu-item{
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .menu-item:hover{
+      color: antiquewhite;
+      text-decoration: none;
+    }
+
+/* -------------------- */
+
+    #right-panel{
+      display: flex;
+    }
+
+    #about-content, #education-content{
+      margin: auto;
+    }
+    #education-content{
+      margin-left: 15px;
+    }
+
+    .fio {
+      color: rgb(52, 58, 64);
+      font-family: "Saira Extra Condensed";
+      font-size: 92px;
+      font-weight: bold;
+      margin-bottom: 0;
+    }
+    #surname{
+      color: #bd5d38;
+    }
+
+    #address {
+      color: rgb(108, 117, 125);
+      font-family: "Saira Extra Condensed";
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 2em;
+    }
+    .a-address {
+      text-decoration: none;
+      color: rgb(108, 117, 125);
+    }
+    .a-address:hover {
+      text-decoration: none;
+      color:#bd5d38;
+    }
+
+    .right-title{
+      color: rgb(52, 58, 64);
+      font-family: "Saira Extra Condensed";
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 1em;
+ 
+    }
+
+    .edu-item{
+      display: flex;
+    }
