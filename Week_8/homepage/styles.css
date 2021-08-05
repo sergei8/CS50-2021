@@ -1,115 +1,160 @@
-    /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
-    .row.content {height: 800px}
-        
-    /* Set black background color, white text and some padding */
-    footer {
-      background-color: #555;
-      color: white;
-      padding: 15px;
-    }
+/* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+.row.content {height: 800px}
     
-    /* On small screens, set height to 'auto' for sidenav and grid */
-    @media screen and (max-width: 767px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height: auto;} 
-    }
+/* Set black background color, white text and some padding */
+footer {
+  background-color: #555;
+  color: white;
+  padding: 15px;
+}
 
-    .img-profile {
-      max-width: 10rem;
-      max-height: 10rem;
-      border: .5rem solid rgba(255, 255, 255, 0.2);
-    }
+/* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height: auto;} 
+}
 
-    .img-fluid {
-      max-width: 100%;
-      height: auto;
-    }
-    
-    .rounded-circle {
-      border-radius: 50% !important;
-    }
-    
-    #left-panel {
-      display: flex;
-      text-align: center;
-      background-color: #bd5d38 !important;
-    }
+.img-profile {
+  max-width: 10rem;
+  max-height: 10rem;
+  border: .5rem solid rgba(255, 255, 255, 0.2);
+}
 
-    #left-content{
-      margin: auto;
-    }
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
 
-    #menu{
-      text-align: left;
-      list-style: none;
-      font-weight: 800;
-      letter-spacing: .05rem;
-      line-height: 2.1em;
-      padding-left: 1em;
-      margin-top: 2em;
-    }
+.rounded-circle {
+  border-radius: 50% !important;
+}
 
-    .menu-item{
-      color: rgba(255, 255, 255, 0.55);
-    }
+#left-panel {
+  display: flex;
+  text-align: center;
+  background-color: #bd5d38 !important;
+}
 
-    .menu-item:hover{
-      color: antiquewhite;
-      text-decoration: none;
-    }
+#left-content{
+  margin: auto;
+}
+
+#menu{
+  text-align: left;
+  list-style: none;
+  font-weight: 800;
+  letter-spacing: .05rem;
+  line-height: 2.1em;
+  padding-left: 1em;
+  margin-top: 2em;
+}
+
+.menu-item{
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.menu-item:hover{
+  color: antiquewhite;
+  text-decoration: none;
+}
 
 /* -------------------- */
 
-    #right-panel{
-      display: flex;
-    }
+#right-panel{
+  display: flex;
+  flex-direction: column;
+}
 
-    #about-content, #education-content{
-      margin: auto;
-    }
-    #education-content{
-      margin-left: 15px;
-    }
+#about-content, #education-content{
+  margin: auto;
+}
+#education-content{
+  margin-left: 15px;
+}
 
-    .fio {
-      color: rgb(52, 58, 64);
-      font-family: "Saira Extra Condensed";
-      font-size: 92px;
-      font-weight: bold;
-      margin-bottom: 0;
-    }
-    #surname{
-      color: #bd5d38;
-    }
+#family-content{
+  margin-top: 15px;
+  margin-left: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
 
-    #address {
-      color: rgb(108, 117, 125);
-      font-family: "Saira Extra Condensed";
-      font-size: 24px;
-      font-weight: 500;
-      margin-bottom: 2em;
-    }
-    .a-address {
-      text-decoration: none;
-      color: rgb(108, 117, 125);
-    }
-    .a-address:hover {
-      text-decoration: none;
-      color:#bd5d38;
-    }
+#family-content {
+  margin: 15px;
+}
+.card {
+  width: 400px;
+  margin: 15px;
+}
 
-    .right-title{
-      color: rgb(52, 58, 64);
-      font-family: "Saira Extra Condensed";
-      font-size: 36px;
-      font-weight: bold;
-      margin-bottom: 1em;
- 
-    }
+.fio {
+  color: rgb(52, 58, 64);
+  font-family: "Saira Extra Condensed";
+  font-size: 92px;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+#surname{
+  color: #bd5d38;
+}
 
-    .edu-item{
-      display: flex;
-    }
+#address {
+  color: rgb(108, 117, 125);
+  font-family: "Saira Extra Condensed";
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 2em;
+}
+.a-address {
+  text-decoration: none;
+  color: rgb(108, 117, 125);
+}
+.a-address:hover {
+  text-decoration: none;
+  color:#bd5d38;
+}
+
+.right-title{
+  color: rgb(52, 58, 64);
+  font-family: "Saira Extra Condensed";
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 1em;
+  letter-spacing: .2em;
+}
+
+.edu-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: baseline;
+}
+
+.edu-name{
+  width: 25em;
+  font-family: "Saira Extra Condensed";
+  font-size: 36px;
+  font-weight: bold;
+  color: rgb(52, 58, 64);
+}
+.grade-name{
+  font-family: "Saira Extra Condensed";
+  font-size: 30px;
+  font-weight: 300;
+  color: rgb(108, 117, 125);
+}
+
+.edu-year{
+  font-family: "Saira Extra Condensed";
+  font-size: 20px;
+  margin-bottom: 3em;
+} 
+
+#family-title{
+  margin-top: 15px;
+  margin-left: 15px;
+}
