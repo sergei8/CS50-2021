@@ -4,6 +4,7 @@ import urllib.parse
 
 from flask import redirect, render_template, request, session
 from functools import wraps
+from app_config import API_KEY, API_LOCATION
 
 
 def apology(message, code=400):
@@ -62,3 +63,12 @@ def lookup(symbol):
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+
+def get_api_key() -> str:
+    if API_LOCATION == "env":
+        import os
+        return os.environ.get("API_KEY")
+    else:
+        return  API_KEY
+
