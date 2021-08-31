@@ -18,10 +18,10 @@ def test_qood_quote(mock_lookup_result):
         assert result == 547.45
 
 def test_bed_quote(mock_lookup_result):
-    """it should return -1 value of BAD_SUMBOL"""
+    """it should return -1 value of BAD_SYMBOL"""
     with patch('quote.lookup') as mock_lookup:
         mock_lookup.return_value = None
-        result = get_quote("BAD_SUMBOL".lower())
+        result = get_quote("BAD_SYMBOL".lower())
         assert result == -1
 
     

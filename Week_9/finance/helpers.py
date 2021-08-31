@@ -1,6 +1,9 @@
 import os
+from sqlite3.dbapi2 import Connection, Cursor, Error
 import requests
 import urllib.parse
+from typing import Union
+from datetime import datetime, date, time
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -71,4 +74,37 @@ def get_api_key() -> str:
         return os.environ.get("API_KEY")
     else:
         return  API_KEY
+    
+def get_cash(user_id: int, db: Connection) -> Union[float, None]:
+    """return cash field from user id record or None if not found"""
+    cur: Cursor = db.cursor()
+    sql: str = f"SELECT cash FROM users WHERE id = {user_id};"
+    cur.execute(sql)
+    cash = cur.fetchone()
+    return cash[0] if cash else None
 
+def write_shares(user_id: int, qty: int, price: float, db: Connection) -> Union[int, None]:
+    """add record to `shares` table return record id or None if error"""
+    
+    record = (user_id, qty, price, datetime.isoformat(datetime.today()))
+    try:
+        cur = db.cursor()
+        cur.execute(
+            "INSERT INTO shares VALUES (NULL, ?, ?, ?, ?);", record
+        )
+    except Error:
+        return None
+    
+    return cur.lastrowid
+
+def correct_cash(user_id: int, cash: float, qty: int, 
+                 price: float, db: Connection) -> Union[int, None]:
+    """calculate and insert cash int user table
+    return new cash or None if error"""
+    
+    # calc cash
+    
+    # insert new cash into `users` table
+    
+    return
+    

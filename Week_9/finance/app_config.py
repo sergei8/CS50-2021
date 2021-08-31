@@ -10,5 +10,6 @@ PSW_WEAK = "Weak password"
 USER_PRESENT = "User name is already present"
 DB_ERROR = "Error db connection"
 NOT_ADDED = "User is not present"
-
+USER_NOT_FOUND = "User is not found"
 QUOTE_NOT_FOUND = "Not found"
+NOT_LIMIT = "CASH IS NOT ENOUGH"
