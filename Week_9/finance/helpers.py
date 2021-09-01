@@ -2,8 +2,10 @@ import os
 from sqlite3.dbapi2 import Connection, Cursor, Error
 import requests
 import urllib.parse
-from typing import Union
+from typing import List, Union
 from datetime import datetime, date, time
+from functools import reduce
+from operator import add
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -73,8 +75,9 @@ def get_api_key() -> str:
         import os
         return os.environ.get("API_KEY")
     else:
-        return  API_KEY
-    
+        return API_KEY
+
+
 def get_cash(user_id: int, db: Connection) -> Union[float, None]:
     """return cash field from user id record or None if not found"""
     cur: Cursor = db.cursor()
@@ -83,28 +86,48 @@ def get_cash(user_id: int, db: Connection) -> Union[float, None]:
     cash = cur.fetchone()
     return cash[0] if cash else None
 
-def write_shares(user_id: int, qty: int, price: float, db: Connection) -> Union[int, None]:
+
+def write_shares(user_id: int, symb: str, qty: int, price: float, db: Connection) -> Union[int, None]:
     """add record to `shares` table return record id or None if error"""
-    
-    record = (user_id, qty, price, datetime.isoformat(datetime.today()))
+
+    record = (user_id, symb, qty, price, datetime.isoformat(datetime.today()))
     try:
         cur = db.cursor()
         cur.execute(
-            "INSERT INTO shares VALUES (NULL, ?, ?, ?, ?);", record
+            "INSERT INTO shares VALUES (NULL, ?, ?, ?, ?, ?);", record
         )
+        return cur.lastrowid
     except Error:
         return None
-    
-    return cur.lastrowid
 
-def correct_cash(user_id: int, cash: float, qty: int, 
-                 price: float, db: Connection) -> Union[int, None]:
-    """calculate and insert cash int user table
-    return new cash or None if error"""
-    
-    # calc cash
-    
+
+def set_cash(user_id: int, new_cash: float, db: Connection) -> Union[int, None]:
+    """insert cash int user table return new cash or None if error"""
+
     # insert new cash into `users` table
-    
-    return
-    
+    try:
+        cur = db.cursor()
+        update_params = (new_cash, user_id)
+        cur.execute(
+            "UPDATE users SET cash = ? WHERE id = ?", update_params
+        )
+        return new_cash
+    except Error:
+        return None
+
+
+def get_qty(user_id: int, symb: str, db: Connection):
+    """return current shares qty of the user or None if error"""
+
+    sql = f"SELECT qty FROM shares WHERE user_id ={user_id} AND symbol = '{symb}';"
+
+    try:
+        cur = db.cursor()
+        cur.execute(sql)
+        result: List[int] = [x[0] for x in cur.fetchall()]
+        if len(result) == 0:
+            return (None)
+        # return sum of qty
+        return reduce(add, result, 0)
+    except Error:
+        return None

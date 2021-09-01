@@ -2,7 +2,7 @@ import sqlite3
 import pytest
 from mock import patch
 
-from helpers import get_cash, write_shares, correct_cash
+from helpers import get_cash, write_shares, set_cash, get_qty
 
 
 @pytest.fixture
@@ -29,6 +29,7 @@ def mock_shares_table():
     cur.execute("""CREATE TABLE shares 
                 (id INTEGER, 
                 user_id INTEGER, 
+                symbol TEXT,
                 qty INTEGER, 
                 price NUMERIC, 
                 date DATETIME,
@@ -36,9 +37,35 @@ def mock_shares_table():
     db.commit()
     return db
 
+@pytest.fixture
+def mock_shares_with_rows():
+    db = sqlite3.connect(":memory:")
+    cur = db.cursor()
+    cur.execute("""CREATE TABLE shares 
+                (id INTEGER, 
+                user_id INTEGER, 
+                symbol TEXT,
+                qty INTEGER, 
+                price NUMERIC, 
+                date DATETIME,
+                PRIMARY KEY(id))""")
+    db.commit()
+    records = [
+        (10, "APPL",  10, 5.0, '2021-08-01T20:37:54.992456'),
+        (10, "APPL",  10, 5.0, '2021-08-10T20:37:54.992456'),
+        (11, "APPL",  10, 5.0, '2021-08-10T20:37:54.992456'),
+        (11, "NFLX",  10, 5.0, '2021-08-31T20:37:54.992456'),
+        (10, "APPL", -10, 5.0, '2021-08-31T20:37:54.992456'),
+    ]
+    cur.executemany(
+        "INSERT INTO shares VALUES(NULL, ?, ?, ?, ?, ?)", records
+    )
+    db.commit()
+    
+    return db
 
 @pytest.fixture
-def mock_shares_table_bad():
+def mock_table_bad():
     return sqlite3.connect(":memory:")
 
 
@@ -56,16 +83,23 @@ def test_get_cash_bad(mock_user_table):
 
 def test_write_shares(mock_shares_table):
     """it should return positive number"""
-    result = write_shares(10, 1100, 55.5, mock_shares_table)
+    result = write_shares(10, "APPL", 1100, 55.5, mock_shares_table)
     assert result > 0
 
 
-def test_write_shares_bad(mock_shares_table_bad):
+def test_write_shares_bad(mock_table_bad):
     """it should return None"""
-    result = write_shares(10, 1100, 55.5, mock_shares_table_bad)
+    result = write_shares(10, "APPL", 1100, 55.5, mock_table_bad)
     assert result == None
 
-def test_correct_cash(mock_user_table):
+def test_set_cash(mock_user_table):
     """it should return 9000 as new cash"""
-    result = correct_cash(1, 10000, 10, 10, mock_user_table)
+    result = set_cash(1, 9000, mock_user_table)
     assert result == 9000
+    
+def test_get_qty(mock_shares_with_rows):
+    """should return positive or 0"""
+    result = get_qty(10, "APPL", mock_shares_with_rows)
+    assert result == 10
+    result = get_qty(10, "AAAA", mock_shares_with_rows)
+    assert result == None
