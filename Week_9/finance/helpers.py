@@ -125,9 +125,6 @@ def get_qty(user_id: int, symb: str, db: Connection):
         cur = db.cursor()
         cur.execute(sql)
         result: List[int] = [x[0] for x in cur.fetchall()]
-        if len(result) == 0:
-            return (None)
-        # return sum of qty
-        return reduce(add, result, 0)
+        return sum(result) if len(result) > 0 else None
     except Error:
         return None
