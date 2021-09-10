@@ -6,27 +6,27 @@ sys.path.append(os.getcwd())
 
 from dataclasses import dataclass
 from functools import reduce
-from helpers import get_cash
-from app_config import DB_ERROR, USER_NOT_FOUND
+from helpers import get_cash, lookup
+from app_config import DB_ERROR, USER_NOT_FOUND, CMP_NOT_FOUND
+
+# define row of portfolio
+@dataclass(order=True)
+class Share:
+    symbol: str
+    company_name: str
+    qty: int
+    price: float
+    total: float
+
+# define result portfolio
+@dataclass(order=True)
+class User_state_info:
+    shares:List[Share]
+    cash: float
+    total: float
 
 def portfolio(user_id: int, db: Connection) -> Dict[str, Union[str, int, float]]: 
     """return info about user shares and balance"""
-    
-    # define row of portfolio
-    @dataclass
-    class Share:
-        symbol: str
-        company_name: str
-        qty: int
-        price: float
-        total: float
-
-    # define result portfolio
-    @dataclass
-    class User_state_info:
-        shares:List[Share]
-        cash: float
-        total: float
     
     user_portfolio = User_state_info([], 0, 0)
         
@@ -41,10 +41,11 @@ def portfolio(user_id: int, db: Connection) -> Dict[str, Union[str, int, float]]
     balance = get_shares_info(user_id, db)
     
     # fill result structure with `symbol` and `qty`
-    reduce(lambda i, acc: acc.append(i), balance, user_portfolio.shares)
+    user_portfolio.shares = fill_qty(balance)
+    
+    # fill result structure with 'company_name" and `price`
     
     
-    # fill result structure
     return {}
 
 def get_shares_info(user_id: int, db: Connection) -> List[Tuple[str, int]]: 
@@ -61,4 +62,23 @@ def get_shares_info(user_id: int, db: Connection) -> List[Tuple[str, int]]:
     except Error:
         return []
     
-# TODO def fill_qty(balance: List[Tuple[str, int]]) -> List[] 
+def fill_qty(balance: List[Tuple[str, int]]) -> List[Share]:
+    """return list of `shares` class filled with symbol and qty"""
+    
+    return reduce(lambda acc, i: 
+        acc + [Share(qty = i[1], symbol = i[0], company_name ="", price=0, total=0)], 
+        balance, [])  
+  
+def get_company_and_price(shares: list[Share]) -> list[Share]:
+    """return list of `shares` filled with company_name, and current stock prices"""
+    
+    for share in shares:
+        
+        share_info = lookup(share.symbol)
+        if share_info is not None:
+            share.company_name = share_info["name"]
+            share.price = share_info["price"]
+        else:
+            share.company_name = CMP_NOT_FOUND
+        
+    return shares 
