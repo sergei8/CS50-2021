@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-import register, buy
+from register import register
 
 from helpers import apology, login_required, lookup, usd
 
@@ -51,7 +51,12 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    # portfolio_table = portfolio()
+    portfolio_table = dict()
+    if not isinstance(portfolio_table, dict):        
+        return apology("Error in portfolio")
+    
+    return render_template("portfolio.html")
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -125,7 +130,25 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
-    return apology("TODO")
+    
+    if request.method == "POST":
+        
+        if not (usernamme := request.form.get("username")):
+            return apology("must provide username", 403)
+        if not (password := request.form.get("password")):
+            return apology("must provide password", 403)
+        if not (password_again := request.form.get("password_again")):
+            return apology("must provide password again", 403)
+        if password != password_again:
+            return apology("passwords not equal", 403)
+        
+        user_id, msg = register(usernamme, password)
+        if user_id == -1:
+            return apology(msg, 403)
+        
+        return redirect("/")
+        
+    return render_template("register.html")
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -145,3 +168,9 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+
+    
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8000, debug=True)
+     

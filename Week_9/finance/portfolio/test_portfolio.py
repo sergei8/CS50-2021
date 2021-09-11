@@ -1,11 +1,9 @@
 import pytest
 import sqlite3
 from mock import patch
-from dataclasses import asdict, dataclass, asdict
-from portfolio import get_shares_info, fill_qty, get_company_and_price, \
-    Share
+from dataclasses import asdict, dataclass
+from portfolio import get_shares_info, fill_qty, get_company_and_price, Share
 from app_config import CMP_NOT_FOUND
-import portfolio
 
 @dataclass(order=True)
 class Share:
@@ -92,7 +90,7 @@ def test_get_company_and_price(mock_lookup):
     with patch("portfolio.lookup", mock_lookup):
     
         result = get_company_and_price(shares)
-        assert result == [Share("APPL", "Apple", 10, 5.7, 0),
-                            Share("NFLX", "NetFlix", 11, 5, 0),
+        assert result == [Share("APPL", "Apple", 10, 5.7, 57),
+                            Share("NFLX", "NetFlix", 11, 5, 55),
                             Share(" ", CMP_NOT_FOUND, 11111, 0, 0)]
                         

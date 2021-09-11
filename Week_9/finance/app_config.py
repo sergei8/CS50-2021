@@ -1,7 +1,7 @@
 import sqlite3
 db: sqlite3.Connection = None
 
-API_KEY = "pk_4d3dbd5a59414701962fb108caf625a7"
+API_KEY = ""
 API_LOCATION = "app" # env
 
 NAME_EMPTY = "Empty Name"
