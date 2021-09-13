@@ -5,5 +5,39 @@
 {% endblock %}
 
 {% block main %}
-PORTFOLIO TABLE HERE
+{% if shares_list | length == 0 %}
+        Portfolio is empty for a while
+{% else %}
+<h2 class="text-center">Your Portfolio</h2>
+<table class="table table-bordered table-hover">
+    <tr>
+        <th>Symbol</th>
+        <th>Company Name</th>
+        <th>QTY</th>
+        <th>Price</th>
+        <th>Total</th>
+    </tr>
+    {% for share in shares_list %}
+    <tr>
+        <td>{{ share.symbol}}</td>
+        <td>{{ share.company_name}}</td>
+        <td>{{ share.qty}}</td>
+        <td>{{ share.price}}</td>
+        <td>{{ share.total | round(2)}}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><h5>cash:</h5></td>
+        <td colspan="3"></td>
+        <td><h5>{{ 100 }}</h5></td>
+    </tr>
+    <tr>
+        <td><h5>Grand Total:</h5></td>
+        <td colspan="3"></td>
+        <td><h5>{{ 200 }}</h5></td>
+    </tr>
+
+</table>
+{% endif %}
+
 {% endblock %}

@@ -1,4 +1,5 @@
 import os
+from sys import implementation
 from app_config import DB_ERROR, db
 
 # from cs50 import SQL
@@ -10,6 +11,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from register.register import register as reg
+from portfolio.portfolio import portfolio as port
 
 from helpers import apology, login_required, lookup, usd
 
@@ -51,12 +53,16 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    # portfolio_table = portfolio()
-    portfolio_table = dict()
+    user_id = session["user_id"]
+    portfolio_table = port(user_id, db)
+    
     if not isinstance(portfolio_table, dict):        
         return apology("Error in portfolio")
     
-    return render_template("portfolio.html")
+    return render_template("portfolio.html",
+                           shares_list = portfolio_table["shares"],
+                           cash = portfolio_table["cash"],
+                           total = portfolio_table["total"])
 
 
 @app.route("/buy", methods=["GET", "POST"])
