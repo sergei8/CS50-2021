@@ -84,22 +84,22 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):
+        if not (user_name := request.form.get("username")):
             return apology("must provide username", 403)
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
+        elif not (password := request.form.get("password")):
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
-
+        rows = db.execute(f"SELECT * FROM users WHERE username = '{user_name}'")
+        users:list = list(rows)
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if len(users) != 1 or not check_password_hash(users[0][2], password):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = users[0][0]
 
         # Redirect user to home page
         return redirect("/")
