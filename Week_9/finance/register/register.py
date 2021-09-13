@@ -8,9 +8,9 @@ from app_config import NAME_EMPTY, PSW_EMPTY, PSW_WEAK, USER_PRESENT, \
 
 from werkzeug.security import generate_password_hash
 from sqlite3 import Error as db_error
-from sqlite3.dbapi2 import Cursor
+from sqlite3.dbapi2 import Connection, Cursor
 
-def register(name: str, password: str) -> tuple[int, str]:
+def register(name: str, password: str, db:Connection) -> tuple[int, str]:
     """create user record in the table `uses`
     return tuple (id, name) if success or (-1, error message)"""
     
@@ -25,7 +25,7 @@ def register(name: str, password: str) -> tuple[int, str]:
         return (-1, PSW_WEAK)
     
     # check if the user is already present in the db
-    result = _is_user_present(name)
+    result = _is_user_present(name, db)
     if result[1] == (-1, DB_ERROR):
         return result[1]
     elif result[0] == True:
@@ -44,7 +44,7 @@ def register(name: str, password: str) -> tuple[int, str]:
     id: int = cur.lastrowid
     
     # check if user added success
-    result = _is_user_present(name)
+    result = _is_user_present(name, db)
     if result[0] != True:
         return result[1]
     
@@ -53,7 +53,7 @@ def register(name: str, password: str) -> tuple[int, str]:
     # finally return the sucsess result
     return (id, name)
 
-def _is_user_present(name: str) -> tuple[bool, tuple[int, str]]:
+def _is_user_present(name: str, db: Connection) -> tuple[bool, tuple[int, str]]:
     """Select user record from db `users`"""
     try:
         result = db.cursor().execute(f"""SELECT * FROM users WHERE username == "{name}";""")

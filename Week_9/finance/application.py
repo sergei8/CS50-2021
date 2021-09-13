@@ -1,5 +1,5 @@
 import os
-from app_config import db
+from app_config import DB_ERROR, db
 
 # from cs50 import SQL
 import sqlite3 as SQL
@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from register import register
+from register.register import register as reg
 
 from helpers import apology, login_required, lookup, usd
 
@@ -142,7 +142,7 @@ def register():
         if password != password_again:
             return apology("passwords not equal", 403)
         
-        user_id, msg = register(usernamme, password)
+        user_id, msg = reg(usernamme, password, db)
         if user_id == -1:
             return apology(msg, 403)
         

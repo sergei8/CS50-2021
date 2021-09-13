@@ -24,48 +24,50 @@ def mock_bad_users_table():
 
 def test_empty_name():
     """should return tuple with users id=-1 and message"""
-    assert register("", "123") == (-1, NAME_EMPTY)
+    assert register("", "123", db) == (-1, NAME_EMPTY)
 
 def test_empty_psw():
     """should return tuple with users id=-1 and message"""
-    assert register("Bob", "") == (-1, PSW_EMPTY)
+    assert register("Bob", "", db) == (-1, PSW_EMPTY)
 
 def test_weak_psw():
     """should return tuple with users id=-1 and message"""
-    assert register("Bob", "123") == (-1, PSW_WEAK)
-    assert register("Bob", "1a3b") == (-1, PSW_WEAK)
-    assert register("Bob", "123456789") == (-1, PSW_WEAK)
-    assert register("Bob", "qwertyuopa") == (-1, PSW_WEAK)
+    assert register("Bob", "123", db) == (-1, PSW_WEAK)
+    assert register("Bob", "1a3b", db) == (-1, PSW_WEAK)
+    assert register("Bob", "123456789", db) == (-1, PSW_WEAK)
+    assert register("Bob", "qwertyuopa", db) == (-1, PSW_WEAK)
     
 def test_user_present(mock_users_table):
     """should return id=-1 and message if user present"""
     
     with patch('register.db', mock_users_table) as _:
-        assert register("Dick", "qwer1234") == (-1, USER_PRESENT)
+        assert register("Dick", "qwer1234", mock_users_table) == (-1, USER_PRESENT)
 
 def test_broken_table(mock_bad_users_table):
     """should return id=-1 and message if error in db"""
     
     with patch('register.db', mock_bad_users_table) as _:
-        assert register("Bob", "qwer1234") == (-1, DB_ERROR)
+        
+        assert register("Bob", "qwer1234", mock_bad_users_table) == (-1, DB_ERROR)
         
 def test_is_user_present(mock_users_table, mock_bad_users_table ):
     """test fanction functionality"""
     
     with patch('register.db', mock_users_table ) as _:
-        assert _is_user_present("Dick") == (True, (-1, USER_PRESENT))
+        assert _is_user_present("Dick", mock_users_table) == (True, (-1, USER_PRESENT))
     
     with patch('register.db', mock_users_table ) as _:
-        assert _is_user_present("Bob") == (False, (-1, NOT_ADDED))
+        assert _is_user_present("Bob", mock_users_table) == (False, (-1, NOT_ADDED))
     
     with patch('register.db', mock_bad_users_table) as _:
-        assert _is_user_present("Dick") == (False, (-1, DB_ERROR))
+        assert _is_user_present("Dick", mock_bad_users_table) == (False, (-1, DB_ERROR))
 
 def test_register_Ok(mock_users_table):
     """should return id and name if user add success"""
     
     with patch('register.db',  mock_users_table) as _:
-        result = register("Bob", "1234qwert")
+        db = mock_users_table
+        result = register("Bob", "1234qwert", db)
         assert result[0] > 0
         assert result[1] == "Bob"
         
