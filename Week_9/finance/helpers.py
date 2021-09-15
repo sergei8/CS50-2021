@@ -1,14 +1,15 @@
 import os
 from sqlite3.dbapi2 import Connection, Cursor, Error
+from flask.wrappers import Request
 import requests
 import urllib.parse
-from typing import List, Union
+from typing import List, Tuple, Union
 from datetime import datetime, date, time
-from functools import reduce
+from functools import reduce, wraps
 from operator import add
+from flask import request
 
 from flask import redirect, render_template, request, session
-from functools import wraps
 from app_config import API_KEY, API_LOCATION
 
 

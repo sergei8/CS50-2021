@@ -1,5 +1,6 @@
 import os
 from sys import implementation
+from typing import Tuple
 from app_config import DB_ERROR, db
 
 # from cs50 import SQL
@@ -12,8 +13,11 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from register.register import register as reg
 from portfolio.portfolio import portfolio as port
+from buy.buy import buy_share
+from sell.sell import sell_shares
 
 from helpers import apology, login_required, lookup, usd
+from app_config import QUOTE_NOT_FOUND
 
 # Configure application
 app = Flask(__name__)
@@ -69,7 +73,27 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    
+    user_id = session["user_id"]
+
+    if request.method == "GET":
+        return render_template("buy.html")
+    
+    if request.method == "POST":
+        
+        # get required symbol
+        symbol = request.form.get("symbol").upper()
+        try:
+            qty = int(request.form.get("qty"))
+        except ValueError:
+            return apology("QTY is empty!", 403)
+        
+        # proceed buy function
+        buy_result: Tuple[float, str] = buy_share(db, user_id, symbol, qty )
+        if buy_result[0] == -1:
+            return apology(buy_result[1], 403)
+
+        return redirect("/")
 
 
 @app.route("/history")
@@ -161,7 +185,27 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+    
+    user_id = session["user_id"]
+
+    if request.method == "GET":
+        return render_template("sell.html")
+    
+    if request.method == "POST":
+        
+        # get required symbol
+        symbol = request.form.get("symbol").upper()
+        try:
+            qty = int(request.form.get("qty"))
+        except ValueError:
+            return apology("QTY is empty!", 403)
+        
+        # proceed buy function
+        sell_result: Tuple[float, str] = sell_shares(db, user_id, symbol, qty )
+        if sell_result[0] == -1:
+            return apology(sell_result[1], 403)
+
+        return redirect("/")
 
 
 def errorhandler(e):

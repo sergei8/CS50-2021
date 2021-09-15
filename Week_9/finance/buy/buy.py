@@ -1,7 +1,7 @@
 from sqlite3.dbapi2 import Connection
 import sys
 import os
-from typing import Union, Tuple
+from typing import  Tuple
 sys.path.append(os.getcwd())
 
 from helpers import lookup, get_cash, write_shares, set_cash
@@ -27,7 +27,7 @@ def buy_share(db: Connection, user_id: int, share_symb: str, qty: int) -> Tuple[
         return (-1, f"{NOT_LIMIT} cash: {cash}, your request: {price * qty}")
 
     # add record to shares 
-    if write_shares(user_id, qty, price, db) is None:
+    if write_shares(user_id, share_symb, qty, price, db) is None:
         return (-1, f"write_shares: {DB_ERROR}")
 
     # set cash limit in the `users` table

@@ -4,7 +4,6 @@ from mock import patch
 
 from helpers import get_cash, write_shares, set_cash, get_qty
 
-
 @pytest.fixture
 def mock_user_table():
     db = sqlite3.connect(":memory:")
@@ -85,6 +84,8 @@ def test_write_shares(mock_shares_table):
     """it should return positive number"""
     result = write_shares(10, "APPL", 1100, 55.5, mock_shares_table)
     assert result > 0
+    result = write_shares(10, "APPL", 1100 * (-1), 55.5, mock_shares_table)
+    assert result > 0
 
 
 def test_write_shares_bad(mock_table_bad):
@@ -103,3 +104,4 @@ def test_get_qty(mock_shares_with_rows):
     assert result == 10
     result = get_qty(10, "AAAA", mock_shares_with_rows)
     assert result == None
+    
