@@ -15,6 +15,7 @@ from register.register import register as reg
 from portfolio.portfolio import portfolio as port
 from buy.buy import buy_share
 from sell.sell import sell_shares
+from quote.quote import get_quote
 
 from helpers import apology, login_required, lookup, usd
 from app_config import QUOTE_NOT_FOUND
@@ -154,8 +155,20 @@ def logout():
 @login_required
 def quote():
     """Get stock quote."""
-    return apology("TODO")
-
+    
+    if request.method == "GET":
+        return render_template('/quote.html')
+    
+    if request.method == "POST":
+        
+        # get symbol from form
+        symb: str = request.form.get("symbol")
+        
+        # find share price
+        if (price := get_quote(symb.upper())) == -1:
+            return apology(QUOTE_NOT_FOUND, 403)
+        
+        return render_template('/quoted.html', symbol=symb.upper(), price=price)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
