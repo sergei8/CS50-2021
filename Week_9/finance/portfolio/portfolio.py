@@ -34,11 +34,11 @@ def portfolio(user_id: int, db: Connection) -> Dict[str, Union[str, int, float]]
     user_portfolio = User_state_info([], 0, 0)
 
     # get user cash from `users` table
-    if cash := get_cash(user_id, db) is None:
+    if (cash := get_cash(user_id, db)) is None:
         return [-1, f"`get_cash: {DB_ERROR} or {USER_NOT_FOUND}"]
 
     # fill result structure with cash
-    user_portfolio.cash = cash
+    user_portfolio.cash = round(cash,2)
 
     # get user balance from `shares` table
     balance = get_shares_info(user_id, db)
@@ -49,6 +49,9 @@ def portfolio(user_id: int, db: Connection) -> Dict[str, Union[str, int, float]]
     # fill result structure with 'company_name" and `price`
     user_portfolio.shares = get_company_and_price(user_portfolio.shares)
 
+    # calc and fill `total` field
+    user_portfolio.total = sum([x.total for x in user_portfolio.shares]) + user_portfolio.cash
+    
     return user_portfolio.__dict__
 
 

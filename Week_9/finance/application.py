@@ -16,6 +16,7 @@ from portfolio.portfolio import portfolio as port
 from buy.buy import buy_share
 from sell.sell import sell_shares
 from quote.quote import get_quote
+from history.history import history as hist
 
 from helpers import apology, login_required, lookup, usd
 from app_config import QUOTE_NOT_FOUND
@@ -101,9 +102,11 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
-
-
+    
+    user_id = session["user_id"]
+    history_list = hist(user_id, db)
+    return render_template('history.html', history=history_list)
+    
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""

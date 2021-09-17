@@ -18,23 +18,25 @@
         <th>Total</th>
     </tr>
     {% for share in shares_list %}
-    <tr>
-        <td>{{ share.symbol}}</td>
-        <td>{{ share.company_name}}</td>
-        <td>{{ share.qty}}</td>
-        <td>{{ share.price}}</td>
-        <td>{{ share.total | round(2)}}</td>
-    </tr>
+        {% if share.total > 0 %}
+        <tr>
+            <td>{{ share.symbol}}</td>
+            <td>{{ share.company_name}}</td>
+            <td>{{ share.qty}}</td>
+            <td>{{ share.price}}</td>
+            <td>{{ share.total | round(2)}}</td>
+        </tr>
+        {% endif %}
     {% endfor %}
     <tr>
-        <td><h5>cash:</h5></td>
+        <td>Cash:</td>
         <td colspan="3"></td>
-        <td><h5>{{ 100 }}</h5></td>
+        <td>{{ cash | round(1)}}</td>
     </tr>
-    <tr>
-        <td><h5>Grand Total:</h5></td>
+    <tr>    
+        <td>Grand Total:</td>
         <td colspan="3"></td>
-        <td><h5>{{ 200 }}</h5></td>
+        <td><strong>{{ total | round(1) }}</strong></td>
     </tr>
 
 </table>
