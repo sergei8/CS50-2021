@@ -88,14 +88,14 @@ def buy():
         try:
             qty = int(request.form.get("qty"))
         except ValueError:
-            return apology("QTY is empty!", 403)
+            return apology("QTY is empty!", 400)
         
         # proceed buy function
         buy_result: Tuple[float, str] = buy_share(db, user_id, symbol, qty )
         if buy_result[0] == -1:
-            return apology(buy_result[1], 403)
+            return apology(buy_result[1], 400)
 
-        return redirect("/")
+        return redirect("/", 200)
 
 
 @app.route("/history")

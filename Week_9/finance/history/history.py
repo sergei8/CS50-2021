@@ -16,7 +16,7 @@ def history(user_id: int, db: Connection) -> List[Tuple[str, int, float, str]]:
         cur = db.cursor()
         cur.execute(sql)
         result = cur.fetchall()
-        return [x[1:] for x in result]
+        return  [x[1:] for x in result] if result  else []
     except Error:
         return None
     
