@@ -1,10 +1,22 @@
-{
-  "activity_type": "Walk",
-  "distance": 6556.8,
-  "moving_time": 3971,
-  "total_time": 4210,
-  "date": "2021-09-23T18:20:0",
-  "is_private": true,
-  "average_speed": 1.598,
-  "max_speed": 8.9
-}
+[
+  {
+    "activity_type": "Walk",
+    "distance": 6556.8,
+    "moving_time": 3971,
+    "total_time": 4210,
+    "date": "2021-09-23T18:20:0",
+    "is_private": true,
+    "average_speed": 1.598,
+    "max_speed": 8.9
+  },
+  {
+    "activity_type": "Walk",
+    "distance": 6556.8,
+    "moving_time": 3971,
+    "total_time": 4210,
+    "date": "2021-09-23T18:20:0",
+    "is_private": true,
+    "average_speed": 1.598,
+    "max_speed": 8.9
+  }
+]

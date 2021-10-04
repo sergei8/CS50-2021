@@ -2,9 +2,9 @@ import sys
 import os
 sys.path.append(os.path.join(sys.path[0], '..'))
 
-from app import Activities
+from app_config import Activities, ACTIVITIES_FILE
 from data_service import get_strava_activities, write_actvities_file, \
-    read_activities_file
+    read_activities_file, json_to_activities, read_strava
 from mock import patch
 import pytest
 import json
@@ -70,28 +70,27 @@ def test_get_strava_activities(mocked_activities):
 
         # check for presented activities
         read_strava.return_value = mocked_activities
-        result = get_strava_activities()
         expected = [
             Activities("Walk", 6556.8, 3971, 4210, "2021-09-23T18:20:0",
                        True, 1.598, 8.9)
         ]
-        assert result == expected
+        assert get_strava_activities() == expected
 
         # check for empty activities or error
         read_strava.return_value = []
-        result = get_strava_activities()
-        expected = []
-        assert result == expected
+        assert get_strava_activities() == []
 
 def test_write_actvities_file():
     """should write mocked activities and return result tuple"""
     
     _activities = [
         Activities("Walk", 6556.8, 3971, 4210, "2021-09-23T18:20:0",
+                       True, 1.598, 8.9),
+        Activities("Walk", 6556.8, 3971, 4210, "2021-09-23T18:20:0",
                        True, 1.598, 8.9)
     ]
     result = write_actvities_file(_activities)
-    assert result == (1, '')
+    assert result == (2, '')
 
     assert write_actvities_file([])[0] == -1
     
@@ -103,7 +102,7 @@ def mocked_activities_file():
                        True, 1.598, 8.9),
          Activities("Ride", 6556.8, 3971, 4210, "2021-09-24T18:20:0",
                        False, 1.598, 8.9),
-         Activities("Walk", 6556.8, 3971, 4210, "2021-09-24T18:20:0",
+         Activities("Walk", 6556.8, 3971, 4210, "2021-09-25T18:20:0",
                        True, 1.598, 8.9)
     ]
     
@@ -113,11 +112,50 @@ def test_read_activities_file(mocked_activities_file):
     
     with patch("data_service.json_to_activities") as json_to_activities:
         json_to_activities.return_value = mocked_activities_file
-        result = read_activities_file(type="Ride")
+        
+        # check default values
         expected = mocked_activities_file
-        assert result == expected
+        assert read_activities_file() == expected
+        
+        # check `type` 
+        expected = [
+         Activities("Ride", 6556.8, 3971, 4210, "2021-09-24T18:20:0",
+                       False, 1.598, 8.9)
+        ]
+        assert read_activities_file(type="Ride") == expected
+        
+        # check `type` and `private` filters
+        expected = [
+         Activities("Walk", 6556.8, 3971, 4210, "2021-09-23T18:20:0",
+                       True, 1.598, 8.9),
+         Activities("Walk", 6556.8, 3971, 4210, "2021-09-25T18:20:0",
+                       True, 1.598, 8.9)
+        ]
+        assert read_activities_file(type="Walk", private=True) == expected
+        
+        # check for date interval
+        expected = [
+         Activities("Ride", 6556.8, 3971, 4210, "2021-09-24T18:20:0",
+                       False, 1.598, 8.9),
+         Activities("Walk", 6556.8, 3971, 4210, "2021-09-25T18:20:0",
+                       True, 1.598, 8.9)
+        ]
+        assert read_activities_file(date_from="2021-09-24", date_to="2021-09-30") == expected
+
+        # check for date interval and `privte`
+        expected = [
+         Activities("Ride", 6556.8, 3971, 4210, "2021-09-24T18:20:0",
+                       False, 1.598, 8.9)
+        ]
+        assert read_activities_file(date_from="2021-09-24", date_to="2021-09-30", private=False) == expected
+
+
+def test_json_to_activities():
+    assert json_to_activities(ACTIVITIES_FILE)[0] == 2  
+    assert json_to_activities("dummy_file.json")[0] == -1
     
-    
-    
+
+def test_read_strava():
+    result = read_strava() 
     
     
