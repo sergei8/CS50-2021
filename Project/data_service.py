@@ -89,8 +89,8 @@ def read_strava() -> list:
     
     # get access token 
     res = requests.post(auth_url, data=payload, verify=False)
-    # access_token = res.json()['access_token']
-    access_token = "ccb46d5cc55d6346580e58de602fb2af92667491"
+    access_token = res.json()['access_token']
+    # access_token = "ccb46d5cc55d6346580e58de602fb2af92667491"
 
     # get data
     header = {'Authorization': 'Bearer ' + access_token}
