@@ -12,6 +12,11 @@ import dataclasses
 import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from fastapi.responses import RedirectResponse
+from stravalib.client import Client
+
+REDIRECT_URL = 'http://localhost:8000/authorized'
+
 
 def get_strava_activities() -> list[Activities]:
     '''return list of some items from strava datastore'''
@@ -78,6 +83,18 @@ def read_strava() -> list:
     
     auth_url      = "https://www.strava.com/oauth/token"
     activites_url = "https://www.strava.com/api/v3/athlete/activities"
+    client = Client()
+    
+    authorize_url = client.authorization_url(client_id=CLIENT_ID, redirect_uri=REDIRECT_URL)
+    a = RedirectResponse(authorize_url)
+    token_response = client.exchange_code_for_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, code="748c0b087ab954ba410a80d99ef0c164da9107f7")
+    # token_response = client.exchange_code_for_token(client_id=C÷LIENT_ID, client_secret=CLIENT_SECRET, code=code)
+    access_token = token_response['access_token']
+    refresh_token = token_response['refresh_token']
+    expires_at = token_response['expires_at']
+    client.access_token = access_token
+    client.refresh_token = refresh_token
+    client.token_expires_at = expires_at
     
     payload = {
         'client_id': CLIENT_ID,
