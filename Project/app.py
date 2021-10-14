@@ -3,11 +3,12 @@
 #   - `data_service` - manipulate data for app
 #   - `app_conig` - set config and shares for app
 
-from app_config import config 
+from typing import Optional
+from app_config import config, AUTHORIZE_SERVER_PORT 
 from dataclasses import dataclass
 import data_service
 import streamlit as st
-import pandas as pd
+# import pandas as pd
 
 def set_page_layout():
     # hide streamlite marks
@@ -25,14 +26,13 @@ def set_page_layout():
     st.sidebar.header("HEADER")
     st.sidebar.selectbox("prompt", [1,2,3])
     st.sidebar.button("Import")
-    # st.title("PROBA")
+    st.sidebar.markdown('<a href="http://127.0.0.1:8000">proba</a>', unsafe_allow_html=True)
 
 
 def main():
     
-    # set page layout
     set_page_layout()
-    
+        
 
 if __name__ == "__main__":
     main()

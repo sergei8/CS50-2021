@@ -75,7 +75,7 @@ def read_activities_file(type=None, date_from=None, date_to=None, private=None) 
     return activities
  
 
-def read_strava() -> list:
+def read_strava(token) -> list:
     """read activities from strava. return tuple (code, list)
     code = -1 (error) or `activities count`
     list = records from api response

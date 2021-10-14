@@ -9,6 +9,8 @@ REFRESH_TOKEN = config["refresh_token"]
 ACCESS_TOKEN = config["access_token"]
 
 ACTIVITIES_FILE = "activities.json"
+AUTHORIZE_SERVER_PORT = 8000
+REDIRECT_URL = f'http://localhost:{AUTHORIZE_SERVER_PORT}/authorized'
 
 @dataclass
 class Activities:
