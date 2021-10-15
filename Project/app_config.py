@@ -10,7 +10,9 @@ ACCESS_TOKEN = config["access_token"]
 
 ACTIVITIES_FILE = "activities.json"
 AUTHORIZE_SERVER_PORT = 8000
+STREAMLIT_SERVER_PORT = 8501
 REDIRECT_URL = f'http://localhost:{AUTHORIZE_SERVER_PORT}/authorized'
+PKL_FILE_NAME = "client.pkl"
 
 @dataclass
 class Activities:
