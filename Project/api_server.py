@@ -24,9 +24,12 @@ def save_object(obj:any, filename:str)->None:
 
 def load_object(filename:str):
     """get and return pickle-obect with access token from file"""
-    with open(filename, 'rb') as input:
-        loaded_object = pickle.load(input)
-        return loaded_object
+    try:
+        with open(filename, 'rb') as input:
+            loaded_object = pickle.load(input)
+            return loaded_object
+    except FileNotFoundError:
+        return None
 
 
 def refresh_token()->None:
@@ -45,10 +48,21 @@ def refresh_token()->None:
 
 @app.get("/")
 def read_root():
-    """build authorize url and rediret to it"""
-    authorize_url = client.authorization_url(
-        client_id=CLIENT_ID, redirect_uri=REDIRECT_URL)
-    return RedirectResponse(authorize_url)
+    """read clients attributes from local file,
+    check access token expiration time if yes 
+    refresh token  if file not found - redirect to autorization """
+    
+    client = load_object(PKL_FILE_NAME)
+    if client is None:
+        client = Client()
+        authorize_url = client.authorization_url(client_id=CLIENT_ID,
+                                                 redirect_uri=REDIRECT_URL)
+        return RedirectResponse(authorize_url)
+        
+    else:    
+        if time.time() > client.token_expires_at:
+            refresh_token()
+        return RedirectResponse(f"http://localhost:{STREAMLIT_SERVER_PORT}")
 
 
 @app.get("/authorized/")
@@ -56,8 +70,9 @@ def get_code(state=None, code=None, scope=None):
     """get from strava access token, save it to local file and
     redirect to streamlit page"""
     
-    token_response = client.exchange_code_for_token(
-        client_id=CLIENT_ID, client_secret=CLIENT_SECRET, code=code)
+    token_response = client.exchange_code_for_token(client_id=CLIENT_ID,
+                                                    client_secret=CLIENT_SECRET,
+                                                    code=code)
     access_token = token_response['access_token']
     refresh_token = token_response['refresh_token']
     expires_at = token_response['expires_at']
@@ -66,15 +81,6 @@ def get_code(state=None, code=None, scope=None):
     client.token_expires_at = expires_at
     save_object(client, PKL_FILE_NAME)
     return RedirectResponse(f"http://localhost:{STREAMLIT_SERVER_PORT}")
-
-
-try:
-    client = load_object('client.pkl')
-    if time.time() > client.token_expires_at:
-        refresh_token()
-
-except FileNotFoundError:
-    pass
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
