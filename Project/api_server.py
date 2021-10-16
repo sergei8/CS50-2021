@@ -6,7 +6,6 @@ import time
 import pickle
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
-from fastapi.encoders import jsonable_encoder
 from stravalib.client import Client
 import uvicorn
 from app_config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URL, \
@@ -16,23 +15,23 @@ app = FastAPI()
 client = Client()
 
 
-def save_object(obj:any, filename:str)->None:
+def save_athlete_info(obj:any, filename:str)->None:
     """save pickle-obect with current access-token"""
-    with open(filename, 'wb') as output:
-        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+    with open(filename, 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
 
-def load_object(filename:str):
-    """get and return pickle-obect with access token from file"""
+def load_athlete_info(filename:str):
+    """get and return pickle-object with access token from file"""
     try:
-        with open(filename, 'rb') as input:
-            loaded_object = pickle.load(input)
-            return loaded_object
+        with open(filename, 'rb') as f:
+            athlete = pickle.load(f)
+            return athlete
     except FileNotFoundError:
         return None
 
 
-def refresh_token()->None:
+def refresh_token() -> None:
     """refresh clients `rights` with new access token"""
     refresh_response = client.refresh_access_token(
         client_id=CLIENT_ID,
@@ -52,7 +51,7 @@ def read_root():
     check access token expiration time if yes 
     refresh token  if file not found - redirect to autorization """
     
-    client = load_object(PKL_FILE_NAME)
+    client = load_athlete_info(PKL_FILE_NAME)
     if client is None:
         client = Client()
         authorize_url = client.authorization_url(client_id=CLIENT_ID,
@@ -79,7 +78,7 @@ def get_code(state=None, code=None, scope=None):
     client.access_token = access_token
     client.refresh_token = refresh_token
     client.token_expires_at = expires_at
-    save_object(client, PKL_FILE_NAME)
+    save_athlete_info(client, PKL_FILE_NAME)
     return RedirectResponse(f"http://localhost:{STREAMLIT_SERVER_PORT}")
 
 if __name__ == "__main__":
