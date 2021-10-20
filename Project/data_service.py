@@ -9,7 +9,6 @@ import requests
 import json
 from typing import Tuple
 import dataclasses
-import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from fastapi.responses import RedirectResponse
@@ -18,11 +17,11 @@ from stravalib.client import Client
 REDIRECT_URL = 'http://localhost:8000/authorized'
 
 
-def get_strava_activities() -> list[Activities]:
+def get_strava_activities(token) -> list[Activities]:
     '''return list of some items from strava datastore'''
 
     # read data from strava
-    if len(data := read_strava()) == 0:
+    if len(data := _read_strava(token)) == 0:
         return []
 
     # convert data into list of activiites
@@ -48,18 +47,13 @@ def write_actvities_file(activities: list[Activities]) -> Tuple[int, str]:
     
     with open ("activities.json", "w") as f:
         try:
-            f.write(json.dumps([x for x in dataclasses.asdict()], indent=2))
+            # write activities as one json-formated string
+            f.write(json.dumps([dataclasses.asdict(x)
+                    for x in activities], indent=2))
         except error: 
             return(-1, error)
     
     return (len(activities), '')
-    #     for item in activities:
-    #         try:
-    #             f.write(json.dumps(dataclasses.asdict(item), indent=2))
-    #         except error: 
-    #             return(-1, error)
-    # return (len(activities), '')
-
 
 def read_activities_file(type=None, date_from=None, date_to=None, private=None) -> list[Activities]:
     """return list of saved in the file activities with passed criterias"""
@@ -81,48 +75,14 @@ def read_activities_file(type=None, date_from=None, date_to=None, private=None) 
     return activities
  
 
-def read_strava(token) -> list:
-    """read activities from strava. return tuple (code, list)
-    code = -1 (error) or `activities count`
-    list = records from api response
+def _read_strava(token) -> list:
+    """read activities from strava
     """
-    
-    auth_url      = "https://www.strava.com/oauth/token"
     activites_url = "https://www.strava.com/api/v3/athlete/activities"
-    client = Client()
-    
-    authorize_url = client.authorization_url(client_id=CLIENT_ID, redirect_uri=REDIRECT_URL)
-    a = RedirectResponse(authorize_url)
-    token_response = client.exchange_code_for_token(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, code="748c0b087ab954ba410a80d99ef0c164da9107f7")
-    # token_response = client.exchange_code_for_token(client_id=C÷LIENT_ID, client_secret=CLIENT_SECRET, code=code)
-    access_token = token_response['access_token']
-    refresh_token = token_response['refresh_token']
-    expires_at = token_response['expires_at']
-    client.access_token = access_token
-    client.refresh_token = refresh_token
-    client.token_expires_at = expires_at
-    
-    payload = {
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'refresh_token': REFRESH_TOKEN,
-        'grant_type': "refresh_token",
-        'f': 'json'
-    }
-    
-    # get access token 
-    res = requests.post(auth_url, data=payload, verify=False)
-    access_token = res.json()['access_token']
-    # access_token = "ccb46d5cc55d6346580e58de602fb2af92667491"
-
-    # get data
-    header = {'Authorization': 'Bearer ' + access_token}
+    header = {'Authorization': 'Bearer ' + token}
     data = requests.get(activites_url, headers=header).json()
     return data
 
-
-
-    
 
 def json_to_activities(json_file) -> Tuple[int, list[Activities]]:
     """convert data from json file to the list of activities
