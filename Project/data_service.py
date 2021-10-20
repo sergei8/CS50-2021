@@ -47,12 +47,18 @@ def write_actvities_file(activities: list[Activities]) -> Tuple[int, str]:
         return(-1, "Activities is empty")
     
     with open ("activities.json", "w") as f:
-        for item in activities:
-            try:
-                f.write(json.dumps(dataclasses.asdict(item), indent=2))
-            except error: 
-                return(-1, error)
+        try:
+            f.write(json.dumps([x for x in dataclasses.asdict()], indent=2))
+        except error: 
+            return(-1, error)
+    
     return (len(activities), '')
+    #     for item in activities:
+    #         try:
+    #             f.write(json.dumps(dataclasses.asdict(item), indent=2))
+    #         except error: 
+    #             return(-1, error)
+    # return (len(activities), '')
 
 
 def read_activities_file(type=None, date_from=None, date_to=None, private=None) -> list[Activities]:
