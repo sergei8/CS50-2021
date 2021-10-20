@@ -9,13 +9,15 @@ from pandas.core.frame import DataFrame
 from app_config import config, AUTHORIZE_SERVER_PORT, PKL_FILE_NAME
 from dataclasses import dataclass
 import pickle
-import data_service
+from data_service import get_strava_activities, write_actvities_file
 import streamlit as st
 import time
 import pandas as pd
+from collections import namedtuple
 
+ReturnCode = namedtuple('ret_code', ["code", "message"])
 
-def set_page_layout():
+def main():
     # hide streamlite marks
     hide_streamlit_style = read_markdown_file(
         './markdown/hide_streamlit_symbols.html')
@@ -25,16 +27,37 @@ def set_page_layout():
     col1, col2, col3 = st.sidebar.columns([1, 2, 1])
     col2.image("./img/strava_logo.png", width=200, use_column_width='auto')
 
-    menu_buttons = read_markdown_file("./markdown/token_button.html")
+    menu_buttons = read_markdown_file("./markdown/download_button.html")
     col2.markdown(menu_buttons, unsafe_allow_html=True)
     
     view_about_style = read_markdown_file("./markdown/sidebar_buttons_style.html")
     col2.markdown(view_about_style, unsafe_allow_html=True)
     if col2.button("VIEW"):
+        # get `token(code)` from `client.pkl`
+        token = get_token()
+        
+        # get strava activities into `activities.json`
+        data: Optional[list] = get_strava_activities(token)
+        return_code = ReturnCode._make(write_actvities_file(data))
+        if return_code.code == -1:
+            st.write(return_code.message)
+            print(return_code.messsage)
+            return        
+        # set filters buttons
+        
+        # view data activities
         view_data()
+        
     if col2.button("ABOUT"):
         view_about()
 
+def get_token() -> Optional[str]:
+    """get access token from saved strava tokens file """
+    with open(PKL_FILE_NAME, 'rb') as f:
+        athlete = pickle.load(f)
+    return athlete.access_token
+    
+    
 def check_file_status() -> Tuple[bool, any]:
     """check if access token file exists"""
     try:
@@ -92,15 +115,10 @@ def view_about():
 
 
 def view_data():
-    activities:DataFrame = pd.read_json("activities_full.json")
+    activities:DataFrame = pd.read_json("activities.json")
     st.dataframe(activities)
     # st.write("VIEW DATA")
 
-
-def main():
-
-    # prepare page layout
-    set_page_layout()
 
 
 if __name__ == "__main__":

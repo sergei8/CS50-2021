@@ -15,7 +15,7 @@ app = FastAPI()
 client = Client()
 
 
-def save_athlete_info(obj:any, filename:str)->None:
+def save_athlete_info(obj: any, filename: str) -> None:
     """save pickle-obect with current access-token"""
     with open(filename, 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -31,8 +31,9 @@ def load_athlete_info(filename:str):
         return None
 
 
-def refresh_token() -> None:
-    """refresh clients `rights` with new access token"""
+def refresh_token(client) -> None:
+    """refresh clients `rights` with new access token 
+    and save in local file"""
     refresh_response = client.refresh_access_token(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
@@ -43,6 +44,7 @@ def refresh_token() -> None:
     client.access_token = access_token
     client.refresh_token = refresh_token
     client.token_expires_at = expires_at
+    save_athlete_info(client, PKL_FILE_NAME)
 
 
 @app.get("/")
@@ -60,7 +62,7 @@ def read_root():
         
     else:    
         if time.time() > client.token_expires_at:
-            refresh_token()
+            refresh_token(client)
         return RedirectResponse(f"http://localhost:{STREAMLIT_SERVER_PORT}")
 
 
