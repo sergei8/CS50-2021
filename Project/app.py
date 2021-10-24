@@ -32,24 +32,26 @@ def main():
     
     view_about_style = read_markdown_file("./markdown/sidebar_buttons_style.html")
     col2.markdown(view_about_style, unsafe_allow_html=True)
-    if col2.button("VIEW"):
+    with col2:
+        if st.button("VIEW"):
         # get `token(code)` from `client.pkl`
-        token = get_token()
+            token = get_token()
+            
+            # get strava activities into `activities.json`
+            data: Optional[list] = get_strava_activities(token)
+            return_code = ReturnCode._make(write_actvities_file(data))
+            if return_code.code == -1:
+                st.write(return_code.message)
+                print(return_code.messsage)
+                return        
+            # set filters buttons
+            
+            # view data activities
+            view_data()
         
-        # get strava activities into `activities.json`
-        data: Optional[list] = get_strava_activities(token)
-        return_code = ReturnCode._make(write_actvities_file(data))
-        if return_code.code == -1:
-            st.write(return_code.message)
-            print(return_code.messsage)
-            return        
-        # set filters buttons
-        
-        # view data activities
-        view_data()
-        
-    if col2.button("ABOUT"):
-        view_about()
+    with col2:
+        if st.button("ABOUT"):
+            view_about()
 
 def get_token() -> Optional[str]:
     """get access token from saved strava tokens file """
