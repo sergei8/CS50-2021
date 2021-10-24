@@ -7,7 +7,7 @@ from app_config import config, Activities, ACTIVITIES_FILE, \
     CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN, REFRESH_TOKEN
 import requests
 import json
-from typing import Tuple
+from typing import Optional, Tuple
 import dataclasses
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -38,7 +38,7 @@ def get_strava_activities(token) -> list[Activities]:
     return activities
 
 
-def write_actvities_file(activities: list[Activities]) -> Tuple[int, str]:
+def write_actvities_file(activities: list[Activities]) -> Optional[list]:
     """write activities list to json file
     return tuple with activities coun or (-1, error_msg)"""
     
@@ -60,14 +60,16 @@ def read_activities_file(type=None, date_from=None, date_to=None, private=None) 
     
     # create filters from args
     type_filter = "True" if not type else f"x.activity_type == '{type}'"
+    print("****", type_filter)
     private_filter = "True" if not isinstance(private, bool) else f"x.is_private == {private}"
     date_filter = "True" if (date_from is None and date_to is None) else \
         f"'{date_from}' <=x.date[:10] <= '{date_to}'"
     
     # read json and convert it to list of activities
-    activities: list[Activities] = json_to_activities()
-    
+    activities: list[Activities] = json_to_activities(ACTIVITIES_FILE)[1]
+
     # accumulate list of filtered activities
+    print(type_filter, private_filter, date_filter)
     activities = [x for x in activities if all([
         eval(type_filter), eval(private_filter), eval(date_filter)
         ])]

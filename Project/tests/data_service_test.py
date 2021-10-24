@@ -4,7 +4,7 @@ sys.path.append(os.path.join(sys.path[0], '..'))
 
 from app_config import Activities, ACTIVITIES_FILE
 from data_service import get_strava_activities, write_actvities_file, \
-    read_activities_file, json_to_activities, read_strava
+    read_activities_file, json_to_activities, _read_strava
 from mock import patch
 import pytest
 import json
@@ -111,11 +111,12 @@ def test_read_activities_file(mocked_activities_file):
     """should read mocked file and return activities list"""
     
     with patch("data_service.json_to_activities") as json_to_activities:
-        json_to_activities.return_value = mocked_activities_file
+        json_to_activities.return_value = (None, mocked_activities_file)
         
         # check default values
         expected = mocked_activities_file
-        assert read_activities_file() == expected
+        result = read_activities_file()
+        assert result == expected
         
         # check `type` 
         expected = [
@@ -156,6 +157,6 @@ def test_json_to_activities():
     
 
 def test_read_strava():
-    result = read_strava() 
+    result = _read_strava() 
     
     
