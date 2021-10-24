@@ -15,6 +15,7 @@ import streamlit as st
 import time
 import pandas as pd
 from collections import namedtuple
+from st_material_table import st_material_table
 
 ReturnCode = namedtuple('ret_code', ["code", "message"])
 
@@ -33,7 +34,9 @@ def main():
     
     view_about_style = read_markdown_file("./markdown/sidebar_buttons_style.html")
     col2.markdown(view_about_style, unsafe_allow_html=True)
-    if col2.radio('', ["VIEW"]):
+    
+    opt = col2.radio('', ["VIEW", "ABOUT"], index=1)
+    if opt == "VIEW":
         # get `token(code)` from `client.pkl`
         token = get_token()
             
@@ -44,13 +47,59 @@ def main():
             st.write(return_code.message)
             print(return_code.messsage)
             return        
+    
+        # set menu row
+        st.write("Filters:")
+        type_menu, private_menu, date_from_menu, date_to_menu = st.columns(4)
         # set filters buttons
+        with type_menu:
+            ride = st.checkbox("Ride:", True)
+            walk = st.checkbox("Walk:", True)
         
+        with private_menu:
+            private = st.checkbox("Private:", True)
+            public  = st.checkbox("Public:", True)
+            
+            date_from = date_from_menu.date_input("Date From")
+            date_to   = date_to_menu.date_input("Date To")
+            
+            print(type(date_from), str(date_to))
+        
+        param = {
+            "type"     : set_type_filter(ride, walk),
+            "private"  : set_private_filter(private, public),
+            "date_from": set_date_filter(date_from),
+            "date_to"  : set_date_filter(date_to),
+        }
         # view data activities
-        view_data()
+        view_data(param)
         
-    if col2.button("ABOUT"):
+    elif opt == "ABOUT" :   
         view_about()
+        
+def set_date_filter(date: any) -> Optional[str]:
+    return None if not date else str(date)      
+        
+def set_private_filter(private: Optional[bool], public: Optional[bool]) -> Optional[bool]:
+    if private and public:
+        return None
+    elif private:
+        return True
+    elif public:
+        return False
+    else:
+        return False
+
+
+def set_type_filter(ride: Optional[str], walk: Optional[str]) -> Optional[str]:
+    if ride and walk:
+        return None
+    elif ride:
+        return "Ride"
+    elif walk:
+        return "Walk"
+    else:
+        return "return nothing"
 
 def get_token() -> Optional[str]:
     """get access token from saved strava tokens file """
@@ -116,13 +165,12 @@ def view_about():
 
 
 def view_data(param={}):
-    if st.checkbox("SHOW"):
-        param = {
-            "type": "Walk"
-        }
-        activities = pd.DataFrame([dataclasses.asdict(x) for x in read_activities_file(**param)])
-        st.write("VIEW DATA")
-        st.dataframe(activities)
+    activities = pd.DataFrame([dataclasses.asdict(x) for x in read_activities_file(**param)])
+    # print(activities)
+    if not activities.empty:
+        st.write("ACTIVITIES DATA")
+        _ = st_material_table(activities)
+    # st.dataframe(activities)
 
 
 
