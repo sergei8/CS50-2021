@@ -33,13 +33,15 @@ def main():
     view_about_style = read_markdown_file("./markdown/sidebar_buttons_style.html")
     col2.markdown(view_about_style, unsafe_allow_html=True)
     
-    opt = col2.radio('', ["VIEW STATISTIC", "ABOUT APP"], index=1)
+    opt = col2.radio('', ["HOME", "VIEW STATISTIC", "ABOUT APP"], index=0)
     if opt == "VIEW STATISTIC":
         # get `token(code)` from `client.pkl`
         token = get_token()
             
         # get strava activities into `activities.json`
         data: Optional[list] = get_strava_activities(token)
+        if data is None:
+            return
         return_code = ReturnCode._make(write_actvities_file(data))
         if return_code.code == -1:
             st.write(return_code.message)
@@ -71,7 +73,11 @@ def main():
         # view data activities
         view_data(param)
         
-    elif opt == "ABOUT APP" :   
+    elif opt == "ABOUT APP" :
+        about_file =  read_markdown_file("./README.md")
+        st.markdown(about_file)
+
+    elif opt == "HOME":
         view_about()
         
 def set_date_filter(date: any) -> Optional[str]:
@@ -167,19 +173,19 @@ def view_about():
 def view_data(param={}):
     activities = pd.DataFrame([dataclasses.asdict(x) 
                                for x in read_activities_file(**param)])
-    activities.rename({"activity_type": "Activity", "distance": "Distance", "moving_time": "Moving Time",
-                       "date" : "Date", "average_speed": "Avg Speed"}, inplace=True, axis=1)
+    activities.rename({"activity_type": "ACTIVITY", "distance": "DISTANCE", "moving_time": "MOVING TIME",
+                       "date" : "DATE", "average_speed": "AVG SPEED"}, inplace=True, axis=1)
     
     if not activities.empty:
         # format columns
-        activities["Distance"] = round(activities["Distance"] / 1000, 1)
-        activities["Moving Time"] = round(activities["Moving Time"] / 3600, 2)
-        activities["Date"] = activities["Date"].astype(str)
-        activities["Date"] = activities["Date"].map(lambda x: x[:10])
-        activities["Avg Speed"] = round(activities["Distance"] / activities["Moving Time"], 2)
+        activities["DISTANCE"] = round(activities["DISTANCE"] / 1000, 1)
+        activities["MOVING TIME"] = round(activities["MOVING TIME"] / 3600, 2)
+        activities["DATE"] = activities["DATE"].astype(str)
+        activities["DATE"] = activities["DATE"].map(lambda x: x[:10])
+        activities["Avg Speed"] = round(activities["DISTANCE"] / activities["MOVING TIME"], 2)
 
         st.markdown("### ACTIVITIES DATA ###")
-        _ = st_material_table(activities[["Activity", "Distance", "Moving Time", "Date", "Avg Speed"]])
+        _ = st_material_table(activities[["ACTIVITY", "DISTANCE", "MOVING TIME", "DATE", "AVG SPEED"]])
 
 
 

@@ -25,16 +25,19 @@ def get_strava_activities(token) -> list[Activities]:
         return []
 
     # convert data into list of activiites
-    activities = [Activities(activity_type  =item["type"],
-                             distance       =item["distance"],
-                             moving_time    =item["moving_time"],
-                             total_time     =item["elapsed_time"],
-                             is_private     =item["private"],
-                             date           =item["start_date"][:-2],
-                             average_speed  =item["average_speed"],
-                             max_speed      =item["max_speed"]) 
+    try:
+        activities = [Activities(activity_type  =item["type"],
+                                distance       =item["distance"],
+                                moving_time    =item["moving_time"],
+                                total_time     =item["elapsed_time"],
+                                is_private     =item["private"],
+                                date           =item["start_date"][:-2],
+                                average_speed  =item["average_speed"],
+                                max_speed      =item["max_speed"]) 
                   for item in data]
-
+    except TypeError:
+        return None
+    
     return activities
 
 
