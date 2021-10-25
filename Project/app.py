@@ -16,6 +16,7 @@ import time
 import pandas as pd
 from collections import namedtuple
 from st_material_table import st_material_table
+from datetime import datetime as dt
 
 ReturnCode = namedtuple('ret_code', ["code", "message"])
 
@@ -24,19 +25,16 @@ def main():
     hide_streamlit_style = read_markdown_file(
         './markdown/hide_streamlit_symbols.html')
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
+    
     # set sidebar
     col1, col2, col3 = st.sidebar.columns([1, 2, 1])
     col2.image("./img/strava_logo.png", width=200, use_column_width='auto')
 
-    menu_buttons = read_markdown_file("./markdown/download_button.html")
-    col2.markdown(menu_buttons, unsafe_allow_html=True)
-    
     view_about_style = read_markdown_file("./markdown/sidebar_buttons_style.html")
     col2.markdown(view_about_style, unsafe_allow_html=True)
     
-    opt = col2.radio('', ["VIEW", "ABOUT"], index=1)
-    if opt == "VIEW":
+    opt = col2.radio('', ["VIEW STATISTIC", "ABOUT APP"], index=1)
+    if opt == "VIEW STATISTIC":
         # get `token(code)` from `client.pkl`
         token = get_token()
             
@@ -49,8 +47,9 @@ def main():
             return        
     
         # set menu row
-        st.write("Filters:")
+        st.markdown("<h4 style='color: lightgreen;'>Filters:</h4>", unsafe_allow_html=True)
         type_menu, private_menu, date_from_menu, date_to_menu = st.columns(4)
+        
         # set filters buttons
         with type_menu:
             ride = st.checkbox("Ride:", True)
@@ -62,9 +61,7 @@ def main():
             
             date_from = date_from_menu.date_input("Date From")
             date_to   = date_to_menu.date_input("Date To")
-            
-            print(type(date_from), str(date_to))
-        
+                    
         param = {
             "type"     : set_type_filter(ride, walk),
             "private"  : set_private_filter(private, public),
@@ -74,7 +71,7 @@ def main():
         # view data activities
         view_data(param)
         
-    elif opt == "ABOUT" :   
+    elif opt == "ABOUT APP" :   
         view_about()
         
 def set_date_filter(date: any) -> Optional[str]:
@@ -162,14 +159,27 @@ def view_about():
     st.image("./img/morda.png", use_column_width='auto')
     about_footer = f"<h5 style='color:gray; text-align:center'>{footer_message[status_message]}</h6>"
     st.markdown(about_footer, unsafe_allow_html=True)
+    if status_message == "token_expire":
+        menu_buttons = read_markdown_file("./markdown/download_button.html")
+        st.markdown(menu_buttons, unsafe_allow_html=True)
 
 
 def view_data(param={}):
     activities = pd.DataFrame([dataclasses.asdict(x) 
                                for x in read_activities_file(**param)])
+    activities.rename({"activity_type": "Activity", "distance": "Distance", "moving_time": "Moving Time",
+                       "date" : "Date", "average_speed": "Avg Speed"}, inplace=True, axis=1)
+    
     if not activities.empty:
+        # format columns
+        activities["Distance"] = round(activities["Distance"] / 1000, 1)
+        activities["Moving Time"] = round(activities["Moving Time"] / 3600, 2)
+        activities["Date"] = activities["Date"].astype(str)
+        activities["Date"] = activities["Date"].map(lambda x: x[:10])
+        activities["Avg Speed"] = round(activities["Distance"] / activities["Moving Time"], 2)
+
         st.markdown("### ACTIVITIES DATA ###")
-        _ = st_material_table(activities)
+        _ = st_material_table(activities[["Activity", "Distance", "Moving Time", "Date", "Avg Speed"]])
 
 
 

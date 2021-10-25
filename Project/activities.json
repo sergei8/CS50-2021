@@ -1,5 +1,15 @@
 [
   {
+    "activity_type": "Ride",
+    "distance": 50915.8,
+    "moving_time": 7487,
+    "total_time": 8667,
+    "date": "2021-10-25T11:38:2",
+    "is_private": false,
+    "average_speed": 6.801,
+    "max_speed": 12.266
+  },
+  {
     "activity_type": "Walk",
     "distance": 11130.5,
     "moving_time": 9095,
@@ -288,15 +298,5 @@
     "is_private": false,
     "average_speed": 5.218,
     "max_speed": 13.0
-  },
-  {
-    "activity_type": "Ride",
-    "distance": 27004.1,
-    "moving_time": 5615,
-    "total_time": 11626,
-    "date": "2021-08-14T13:57:2",
-    "is_private": false,
-    "average_speed": 4.809,
-    "max_speed": 9.7
   }
 ]
