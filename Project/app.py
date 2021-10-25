@@ -152,8 +152,8 @@ def view_about():
 
     # footer message template
     footer_message = {
-        '': 'Press `VIEW` button for look and analyse',
-        "get_token": "Access token not found. Download it.",
+        ''            : 'Press `VIEW` button for look and analyse',
+        "get_token"   : "Access token not found. Download it.",
         "token_expire": "Access token expired"
     }
 
@@ -165,12 +165,11 @@ def view_about():
 
 
 def view_data(param={}):
-    activities = pd.DataFrame([dataclasses.asdict(x) for x in read_activities_file(**param)])
-    # print(activities)
+    activities = pd.DataFrame([dataclasses.asdict(x) 
+                               for x in read_activities_file(**param)])
     if not activities.empty:
-        st.write("ACTIVITIES DATA")
+        st.markdown("### ACTIVITIES DATA ###")
         _ = st_material_table(activities)
-    # st.dataframe(activities)
 
 
 
