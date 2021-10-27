@@ -58,6 +58,7 @@ def write_actvities_file(activities: list[Activities]) -> Optional[list]:
     
     return (len(activities), '')
 
+
 def read_activities_file(type=None, date_from=None, date_to=None, private=None) -> list[Activities]:
     """return list of saved in the file activities with passed criterias"""
     

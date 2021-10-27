@@ -25,7 +25,3 @@ class Activities:
     average_speed: float
     max_speed: float
 
-
-
-# if __name__ == "__main__":
-#     ...
